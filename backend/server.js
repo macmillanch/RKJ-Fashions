@@ -7,10 +7,20 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use('/downloads', express.static('public/downloads'));
 
 // Basic Route
 app.get('/', (req, res) => {
     res.json({ message: 'Ladies Boutique API is running' });
+});
+
+app.get('/api/app-version', (req, res) => {
+    res.json({
+        version: "1.0.0",
+        url: "https://ladies-boutique-backend.onrender.com/downloads/ladies-boutique.apk",
+        forceUpdate: false,
+        releaseNotes: "Initial professional release with cloud database and auto-update support."
+    });
 });
 
 app.get('/api/db-init', async (req, res) => {
