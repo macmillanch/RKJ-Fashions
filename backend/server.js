@@ -121,9 +121,11 @@ app.post('/api/auth/login', async (req, res) => {
     }
 
     try {
+        console.log('Login attempt for:', loginId);
         // Check DB for either phone or email
-        const result = await db.query('SELECT * FROM users WHERE phone = $1 OR email = $1', [loginId]);
+        const result = await db.query('SELECT * FROM users WHERE TRIM(phone) = TRIM($1) OR TRIM(email) = TRIM($1)', [String(loginId).trim()]);
 
+        console.log('Found users:', result.rows.length);
         if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
 
         const user = result.rows[0];
