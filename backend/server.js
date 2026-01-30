@@ -229,24 +229,6 @@ app.put('/api/users/:id', async (req, res) => {
 });
 
 // Admin Promotion (Debug only - normally requires auth)
-app.post('/api/admin/promote', async (req, res) => {
-    const { userId } = req.body;
-    try {
-        const result = await db.query("UPDATE users SET role = 'admin' WHERE id = $1 RETURNING *", [userId]);
-        if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
-
-        const user = result.rows[0];
-        res.json({
-            message: 'User promoted to admin',
-            user: {
-                id: user.id, email: user.email, role: user.role, phone: user.phone,
-                name: user.name, profile_image_url: user.profile_image_url
-            }
-        });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
 
 // --- ORDER ROUTES (Placeholder) ---
 app.get('/api/orders/:userId', async (req, res) => {
