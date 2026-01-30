@@ -17,9 +17,9 @@ app.get('/', (req, res) => {
 app.get('/api/app-version', (req, res) => {
     res.json({
         version: "1.0.7",
-        url: "https://ladies-boutique-backend.onrender.com/downloads/ladies-boutique.apk",
+        url: "https://ladies-boutique-backend.onrender.com/downloads/rkj-fashions.apk",
         forceUpdate: false,
-        releaseNotes: "v1.0.7: Renamed to RKJ Fashions. Signup improvements (Success Dialog). UI Polish."
+        releaseNotes: "RKJ Fashions Update Available!\n\nv1.0.7: Renamed to RKJ Fashions. Signup improvements (Success Dialog). UI Polish."
     });
 });
 
