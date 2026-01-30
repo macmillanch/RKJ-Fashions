@@ -16,10 +16,10 @@ app.get('/', (req, res) => {
 
 app.get('/api/app-version', (req, res) => {
     res.json({
-        version: "1.0.0",
+        version: "1.0.1",
         url: "https://ladies-boutique-backend.onrender.com/downloads/ladies-boutique.apk",
         forceUpdate: false,
-        releaseNotes: "Initial professional release with cloud database and auto-update support."
+        releaseNotes: "New features: Product Image Support, User ID display (RKJ...), and performance improvements."
     });
 });
 
