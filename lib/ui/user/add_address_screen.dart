@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/services/auth_service.dart';
@@ -22,6 +23,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   final TextEditingController _cityController = TextEditingController();
   String? _selectedState;
   bool _isDefault = false;
+  bool _isLoadingPincode = false;
 
   final List<String> _states = [
     'Andhra Pradesh',
@@ -61,6 +63,73 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     'Lakshadweep',
     'Puducherry',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _pincodeController.addListener(_onPincodeChanged);
+  }
+
+  void _onPincodeChanged() {
+    if (_pincodeController.text.length == 6) {
+      _fetchPincodeDetails(_pincodeController.text);
+    }
+  }
+
+  Future<void> _fetchPincodeDetails(String pincode) async {
+    setState(() => _isLoadingPincode = true);
+    try {
+      final response = await http.get(
+        Uri.parse('http://www.postalpincode.in/api/pincode/$pincode'),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['Status'] == 'Success') {
+          final postOffices = data['PostOffice'] as List;
+          if (postOffices.isNotEmpty) {
+            final first = postOffices.first;
+            final district = first['District'];
+            final state = first['State'];
+
+            if (mounted) {
+              setState(() {
+                _cityController.text = district;
+
+                // Try to match state case-insensitively or exact match
+                final matchedState = _states.firstWhere(
+                  (s) => s.toLowerCase() == state.toString().toLowerCase(),
+                  orElse: () => '',
+                );
+
+                if (matchedState.isNotEmpty) {
+                  _selectedState = matchedState;
+                } else if (_states.contains(state)) {
+                  _selectedState = state;
+                }
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Details found: $district, $state')),
+              );
+            }
+          }
+        } else {
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(const SnackBar(content: Text('Invalid Pincode')));
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        debugPrint('Pincode fetch error: $e');
+        // Silent fail or notify
+      }
+    } finally {
+      if (mounted) setState(() => _isLoadingPincode = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -209,6 +278,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                           '000000',
                           _pincodeController,
                           inputType: TextInputType.number,
+                          isLoading: _isLoadingPincode,
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -291,6 +361,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     IconData? icon,
     TextInputType inputType = TextInputType.text,
     bool isOptional = false,
+    bool isLoading = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,6 +388,14 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                   'Optional',
                   style: TextStyle(fontSize: 10, color: AppColors.textMuted),
                 ),
+              ),
+            ],
+            if (isLoading) ...[
+              const SizedBox(width: 8),
+              const SizedBox(
+                width: 12,
+                height: 12,
+                child: CircularProgressIndicator(strokeWidth: 2),
               ),
             ],
           ],
