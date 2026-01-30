@@ -387,6 +387,37 @@ app.delete('/api/products/:id', async (req, res) => {
     }
 });
 
+// --- REVIEW ROUTES ---
+app.get('/api/reviews/:productId', async (req, res) => {
+    const { productId } = req.params;
+    try {
+        const result = await db.query(
+            `SELECT r.*, u.name, u.profile_image_url 
+             FROM reviews r 
+             JOIN users u ON r.user_id = u.id 
+             WHERE r.product_id = $1 
+             ORDER BY r.created_at DESC`,
+            [productId]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/reviews', async (req, res) => {
+    const { userId, productId, rating, reviewText, imageUrls } = req.body;
+    try {
+        const result = await db.query(
+            'INSERT INTO reviews (user_id, product_id, rating, review_text, image_urls) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [userId, productId, rating, reviewText, JSON.stringify(imageUrls || [])]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log(`Server running on port ${PORT}`);

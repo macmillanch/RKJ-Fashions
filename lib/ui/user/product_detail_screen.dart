@@ -218,6 +218,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (_) => ProductReviewScreen(
+                                          productId: widget.product.id,
                                           productName: widget.product.name,
                                           productImage: images.first,
                                           color:

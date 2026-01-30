@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../data/services/auth_service.dart';
+import '../../data/services/database_service.dart';
 
 class ProductReviewScreen extends StatefulWidget {
+  final String productId;
   final String productName;
   final String productImage;
   final String color;
@@ -9,6 +13,7 @@ class ProductReviewScreen extends StatefulWidget {
 
   const ProductReviewScreen({
     super.key,
+    required this.productId,
     required this.productName,
     required this.productImage,
     required this.color,
@@ -319,11 +324,59 @@ class _ProductReviewScreenState extends State<ProductReviewScreen> {
                 ],
               ),
               child: ElevatedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Review Submitted!')),
-                  );
-                  Navigator.pop(context);
+                onPressed: () async {
+                  if (_reviewController.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please write a review')),
+                    );
+                    return;
+                  }
+
+                  try {
+                    final user = context.read<AuthService>().currentUser;
+                    if (user == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Please login to review')),
+                      );
+                      return;
+                    }
+
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (ctx) =>
+                          const Center(child: CircularProgressIndicator()),
+                    );
+
+                    await context.read<DatabaseService>().addReview(
+                      user.id,
+                      widget.productId,
+                      _rating,
+                      _reviewController.text,
+                      [], // TODO: Implement Image Upload
+                    );
+
+                    if (context.mounted) {
+                      Navigator.pop(context); // Close dialog
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Review Submitted Successfully!'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      Navigator.pop(context); // Close screen
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      Navigator.of(
+                        context,
+                        rootNavigator: true,
+                      ).pop(); // Close dialog if open
+                      ScaffoldMessenger.of(
+                        context,
+                      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                    }
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryUser,

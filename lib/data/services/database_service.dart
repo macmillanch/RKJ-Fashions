@@ -198,4 +198,27 @@ class DatabaseService {
       throw Exception('Failed to delete address');
     }
   }
+
+  Future<void> addReview(
+    String userId,
+    String productId,
+    int rating,
+    String reviewText,
+    List<String> imageUrls,
+  ) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/reviews'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'userId': userId,
+        'productId': productId,
+        'rating': rating,
+        'reviewText': reviewText,
+        'imageUrls': imageUrls,
+      }),
+    );
+    if (response.statusCode != 201) {
+      throw Exception('Failed to add review');
+    }
+  }
 }
