@@ -1,11 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
+import '../../data/services/auth_service.dart';
+import '../../data/services/database_service.dart';
 
-class NotificationsScreen extends StatelessWidget {
+class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
 
   @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  Future<void> _markAllRead() async {
+    final user = context.read<AuthService>().currentUser;
+    if (user != null) {
+      await context.read<DatabaseService>().markNotificationsRead(user.id);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Marked all as read')));
+      // Trigger rebuild or let Stream handle it?
+      // If Stream polls, it will update eventually.
+      // If we want instant feedback, we might need manual refresh or optimistic update.
+      setState(() {});
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final user = context.read<AuthService>().currentUser;
+    if (user == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Notifications')),
+        body: const Center(child: Text('Please login to view notifications')),
+      );
+    }
+
     return Scaffold(
       backgroundColor: AppColors.backgroundUser,
       appBar: AppBar(
@@ -18,7 +48,7 @@ class NotificationsScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () {},
+            onPressed: _markAllRead,
             child: const Text(
               'Mark all as read',
               style: TextStyle(
@@ -35,82 +65,94 @@ class NotificationsScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildSectionHeader('TODAY'),
-            _buildNotificationCard(
-              title: 'Order Shipped!',
-              time: '2m ago',
-              description: 'Your summer dress is on the way.\nTrack ID: #88349',
-              icon: Icons.local_shipping,
-              isUnread: true,
-            ),
-            _buildNotificationCard(
-              title: 'Flash Sale Alert',
-              time: '2h ago',
-              description: '20% off all silk scarves until midnight.',
-              icon: Icons.local_offer,
-              isUnread: true,
-              actionLabel: 'Shop Now',
-              color: AppColors.secondaryUser,
-            ),
-            const SizedBox(height: 24),
-            _buildSectionHeader('YESTERDAY'),
-            _buildNotificationCard(
-              title: 'Return Processed',
-              time: '10:30 AM',
-              description:
-                  "We've received your return for Order #88112. Refund initiated.",
-              icon: Icons.check_circle,
-              color: Colors.grey,
-            ),
-            const SizedBox(height: 16),
-            _buildImageNotificationCard(
-              title: 'New Arrivals',
-              time: '4:15 PM',
-              description: 'The Spring Floral collection is finally here.',
-              imageUrl:
-                  'https://lh3.googleusercontent.com/aida-public/AB6AXuBvpwf4hBmxk57SGVJCItD_GEZKpWXDY02o6nWjThVyC4s1yyV2TgUy4isOnnkriSzYR-Uc6jCh0YiTJIUQExFOGkZpoPk7saRCx3wAfi1Z0pH8ljQpxtMG977hohrUAWGCSPP1BSkLOxvmLsoY3QWFCiJhlJI7Xw5nLOxE6fw_k2C3osJ9PoTb5HNKiOTSkcVZVQEBkrlOBqPcQ0xyrFUhfmaTItTvO9ENC7JaKtnpFnw1P6NddraDfaVOTnBbgJeDlUPxffolLCY',
-            ),
-            const SizedBox(height: 40),
-            const Center(
+      body: StreamBuilder<List<Map<String, dynamic>>>(
+        stream: context.read<DatabaseService>().getNotifications(
+          user.id.toString(),
+        ),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final notifications = snapshot.data ?? [];
+
+          if (notifications.isEmpty) {
+            return Center(
               child: Column(
-                children: [
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
                   Icon(
-                    Icons.local_florist_outlined,
-                    size: 48,
+                    Icons.notifications_off_outlined,
+                    size: 64,
                     color: AppColors.textMuted,
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: 16),
                   Text(
-                    "You're all caught up",
+                    "No notifications yet",
                     style: TextStyle(color: AppColors.textMuted),
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(20),
+            itemCount: notifications.length,
+            itemBuilder: (context, index) {
+              final notification = notifications[index];
+              final date =
+                  DateTime.tryParse(notification['created_at'].toString()) ??
+                  DateTime.now();
+              final timeAgo = _formatTimeAgo(date);
+              final isUnread = !(notification['is_read'] ?? false);
+
+              return _buildNotificationCard(
+                title: notification['title'] ?? 'Notification',
+                time: timeAgo,
+                description: notification['description'] ?? '',
+                icon: _getIconForType(notification['type']),
+                isUnread: isUnread,
+                color: _getColorForType(notification['type']),
+              );
+            },
+          );
+        },
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12, left: 4),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.5,
-          color: AppColors.textMuted,
-        ),
-      ),
-    );
+  String _formatTimeAgo(DateTime date) {
+    final diff = DateTime.now().difference(date);
+    if (diff.inDays > 0) return '${diff.inDays}d ago';
+    if (diff.inHours > 0) return '${diff.inHours}h ago';
+    if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
+    return 'Just now';
+  }
+
+  IconData _getIconForType(String? type) {
+    switch (type) {
+      case 'order':
+        return Icons.local_shipping;
+      case 'promo':
+        return Icons.local_offer;
+      case 'system':
+        return Icons.info;
+      default:
+        return Icons.notifications;
+    }
+  }
+
+  Color _getColorForType(String? type) {
+    switch (type) {
+      case 'order':
+        return AppColors.primaryUser;
+      case 'promo':
+        return AppColors.secondaryUser;
+      case 'system':
+        return Colors.grey;
+      default:
+        return AppColors.primaryUser;
+    }
   }
 
   Widget _buildNotificationCard({
@@ -120,13 +162,12 @@ class NotificationsScreen extends StatelessWidget {
     required IconData icon,
     Color color = AppColors.primaryUser,
     bool isUnread = false,
-    String? actionLabel,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isUnread ? Colors.blue.withValues(alpha: 0.05) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -135,6 +176,9 @@ class NotificationsScreen extends StatelessWidget {
             offset: const Offset(0, 4),
           ),
         ],
+        border: isUnread
+            ? Border.all(color: AppColors.primaryUser.withValues(alpha: 0.3))
+            : null,
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,8 +219,10 @@ class NotificationsScreen extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
+                      style: TextStyle(
+                        fontWeight: isUnread
+                            ? FontWeight.bold
+                            : FontWeight.w600,
                         fontSize: 16,
                         color: AppColors.textUser,
                       ),
@@ -198,128 +244,10 @@ class NotificationsScreen extends StatelessWidget {
                     height: 1.5,
                   ),
                 ),
-                if (actionLabel != null) ...[
-                  const SizedBox(height: 12),
-                  GestureDetector(
-                    onTap: () {},
-                    child: Row(
-                      children: [
-                        Text(
-                          actionLabel,
-                          style: TextStyle(
-                            color: color,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.arrow_forward, size: 14, color: color),
-                      ],
-                    ),
-                  ),
-                ],
               ],
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildImageNotificationCard({
-    required String title,
-    required String time,
-    required String description,
-    required String imageUrl,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              width: 100,
-              decoration: BoxDecoration(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  bottomLeft: Radius.circular(16),
-                ),
-                image: DecorationImage(
-                  image: NetworkImage(imageUrl),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: AppColors.textUser,
-                          ),
-                        ),
-                        Text(
-                          time,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      description,
-                      style: const TextStyle(
-                        color: AppColors.textUser,
-                        height: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.backgroundUser,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: const Text(
-                        'Collection',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

@@ -418,6 +418,44 @@ app.post('/api/reviews', async (req, res) => {
     }
 });
 
+// --- NOTIFICATION ROUTES ---
+app.get('/api/notifications/:userId', async (req, res) => {
+    const { userId } = req.params;
+    try {
+        const result = await db.query(
+            'SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC',
+            [userId]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/notifications/read/:userId', async (req, res) => {
+    const { userId } = req.params;
+    try {
+        await db.query('UPDATE notifications SET is_read = TRUE WHERE user_id = $1', [userId]);
+        res.json({ message: 'Notifications marked as read' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/notifications', async (req, res) => {
+    // Internal use mainly
+    const { userId, title, description, type, metadata } = req.body;
+    try {
+        const result = await db.query(
+            'INSERT INTO notifications (user_id, title, description, type, metadata) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            [userId, title, description, type, JSON.stringify(metadata || {})]
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {
     console.log(`Server running on port ${PORT}`);

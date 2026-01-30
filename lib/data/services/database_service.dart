@@ -221,4 +221,25 @@ class DatabaseService {
       throw Exception('Failed to add review');
     }
   }
+
+  Stream<List<Map<String, dynamic>>> getNotifications(String userId) async* {
+    while (true) {
+      try {
+        final response = await http.get(
+          Uri.parse('$_baseUrl/notifications/$userId'),
+        );
+        if (response.statusCode == 200) {
+          final List<dynamic> data = jsonDecode(response.body);
+          yield List<Map<String, dynamic>>.from(data);
+        }
+      } catch (e) {
+        yield [];
+      }
+      await Future.delayed(const Duration(seconds: 10));
+    }
+  }
+
+  Future<void> markNotificationsRead(String userId) async {
+    await http.put(Uri.parse('$_baseUrl/notifications/read/$userId'));
+  }
 }

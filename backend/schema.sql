@@ -92,6 +92,18 @@ CREATE TABLE IF NOT EXISTS reviews (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Create Notifications Table
+CREATE TABLE IF NOT EXISTS notifications (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    title VARCHAR(255),
+    description TEXT,
+    type VARCHAR(50),
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    metadata JSONB
+);
+
 -- Seed Initial Admin
 INSERT INTO users (phone, email, password, role) 
 VALUES ('9876543210', 'admin@boutique.com', '$2b$10$YourHashedPasswordHere', 'admin')
