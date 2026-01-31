@@ -236,7 +236,16 @@ app.put('/api/users/:id', async (req, res) => {
 
 // Admin Promotion (Debug only - normally requires auth)
 
-// --- ORDER ROUTES (Placeholder) ---
+// --- ORDER ROUTES ---
+app.get('/api/orders', async (req, res) => {
+    try {
+        const result = await db.query('SELECT * FROM orders ORDER BY created_at DESC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.get('/api/orders/:userId', async (req, res) => {
     const { userId } = req.params;
     try {
