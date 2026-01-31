@@ -16,10 +16,10 @@ app.get('/', (req, res) => {
 
 app.get('/api/app-version', (req, res) => {
     res.json({
-        version: "1.1.0",
-        url: "https://ladies-boutique-backend.onrender.com/downloads/rkj-fashions-v1.1.0.apk",
-        forceUpdate: false,
-        releaseNotes: "RKJ Fashions v1.1.0: Corrected Map Location and Updated Contact UI."
+        version: "1.1.1",
+        url: "https://ladies-boutique-backend.onrender.com/downloads/rkj-fashions-v1.1.1.apk",
+        forceUpdate: true,
+        releaseNotes: "RKJ Fashions v1.1.1: Critical Fix for Manage Orders (Crash resolved)."
     });
 });
 
