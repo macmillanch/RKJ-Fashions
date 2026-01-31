@@ -441,13 +441,11 @@ class _ContactScreenState extends State<ContactScreen> {
                             child: ElevatedButton.icon(
                               onPressed: _openMap,
                               icon: const Icon(Icons.near_me),
-                              label: const Text('Get Directions'),
+                              label: const Text('Directions'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primaryUser,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                ),
+                                minimumSize: const Size(double.infinity, 56),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -462,11 +460,9 @@ class _ContactScreenState extends State<ContactScreen> {
                               label: const Text('Call Now'),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppColors.primaryUser,
+                                minimumSize: const Size(double.infinity, 56),
                                 side: const BorderSide(
                                   color: AppColors.primaryUser,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
                                 ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
