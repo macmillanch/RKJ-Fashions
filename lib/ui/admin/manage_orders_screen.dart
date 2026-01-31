@@ -132,7 +132,7 @@ class ManageOrdersScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Order #${order.id.substring(0, 5).toUpperCase()}',
+                      'Order #${order.id.toUpperCase()}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
