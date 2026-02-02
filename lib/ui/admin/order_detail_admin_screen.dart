@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/order_model.dart';
 import '../../data/services/database_service.dart';
@@ -163,177 +165,100 @@ class _OrderDetailAdminScreenState extends State<OrderDetailAdminScreen> {
     );
   }
 
+  Future<void> _makePhoneCall(String phoneNumber) async {
+    final Uri launchUri = Uri(scheme: 'tel', path: phoneNumber);
+    try {
+      if (await canLaunchUrl(launchUri)) {
+        await launchUrl(launchUri);
+      } else {
+        throw 'Could not launch $launchUri';
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not make call: $e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final order = widget.order;
-    return Scaffold(
-      backgroundColor: AppColors.backgroundUser,
-      appBar: AppBar(
-        title: const Text(
-          'Order Details',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textUser,
-          ),
-        ),
-        backgroundColor: Colors.white.withValues(alpha: 0.95),
-        centerTitle: true,
-        iconTheme: const IconThemeData(color: AppColors.textUser),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Order Header Card
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: _cardDecoration(),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Order #${order.id.substring(0, 8)}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
-                            ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: _getStatusColor(
-                                  order.orderStatus,
-                                ).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: _getStatusColor(
-                                    order.orderStatus,
-                                  ).withValues(alpha: 0.5),
-                                ),
-                              ),
-                              child: Text(
-                                order.orderStatus.toUpperCase(),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                  color: _getStatusColor(order.orderStatus),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Placed on: ${order.createdAt.toString().split('.')[0]}',
-                          style: const TextStyle(
-                            color: AppColors.textMuted,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
+    const Color primaryColor = Color(0xFF8E5D87);
+    const Color bgColor = Color(0xFFF7F7F7);
 
-                  // Customer Info
-                  const Text(
-                    'CUSTOMER INFO',
-                    style: TextStyle(
+    return Scaffold(
+      backgroundColor: bgColor,
+      body: Column(
+        children: [
+          // Custom TopAppBar
+          Container(
+            padding: const EdgeInsets.fromLTRB(16, 40, 16, 12),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
+            ),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Icon(Icons.arrow_back, color: Color(0xFF151415)),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    'Order #${order.id}',
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.manrope(
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: AppColors.textMuted,
-                      letterSpacing: 1.2,
+                      color: const Color(0xFF151415),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: _cardDecoration(),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.more_vert, color: Color(0xFF151415)),
+                  onPressed: _editTracking,
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : SingleChildScrollView(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.phone,
-                              size: 16,
-                              color: AppColors.textMuted,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              order.userPhone,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        const Row(
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              size: 16,
-                              color: AppColors.textMuted,
-                            ),
-                            SizedBox(width: 8),
-                            Text(
-                              'User Address Placeholder',
-                              style: TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Items
-                  const Text(
-                    'ITEMS',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: AppColors.textMuted,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    decoration: _cardDecoration(),
-                    child: Column(
-                      children: order.items
-                          .map(
-                            (e) => Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: Colors.grey.withValues(alpha: 0.1),
-                                  ),
+                        // Customer Info Section
+                        Container(
+                          color: Colors.white,
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Customer Information",
+                                style: GoogleFonts.manrope(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF151415),
                                 ),
                               ),
-                              child: Row(
+                              const SizedBox(height: 16),
+                              Row(
                                 children: [
-                                  Container(
-                                    width: 50,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[200],
-                                      borderRadius: BorderRadius.circular(8),
+                                  CircleAvatar(
+                                    radius: 28,
+                                    backgroundImage: const NetworkImage(
+                                      "https://lh3.googleusercontent.com/aida-public/AB6AXuBfuP2Urzr9XwAIDjUEi0d-xXZiv_KX90ufHf60C8P2xC191nwJcNh2Uk5F-ALflxd7kFUoNxMUHdIh1XCPPDIe9fvYZbKxoWrFljAj1XV5wCc8XBTn6Zex_NOLeXMsAmaHXaALKST62X9qlEWaFUvFELdL7g1HAPctyUGqzagjGM3JMB63gcG6MbB6vOLhbR81z4QNtQng-BGtjopIbmWmyDNkpsOSE92zpKaKiAA8fiTZilfdm21qaBAFD_H98FXuzKnL1hWch3E",
                                     ),
-                                    child: const Icon(
-                                      Icons.image,
-                                      color: Colors.grey,
-                                    ), // Placeholder or e.image
+                                    backgroundColor: Colors.grey[200],
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(
@@ -342,161 +267,532 @@ class _OrderDetailAdminScreenState extends State<OrderDetailAdminScreen> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          e.name,
-                                          style: const TextStyle(
+                                          order.beneficiaryName ?? "Customer",
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 16,
                                             fontWeight: FontWeight.bold,
+                                            color: const Color(0xFF151415),
                                           ),
                                         ),
+                                        const SizedBox(height: 4),
                                         Text(
-                                          '${e.selectedSize} | ${e.selectedColor}',
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            color: AppColors.textMuted,
+                                          order.userPhone,
+                                          style: GoogleFonts.manrope(
+                                            fontSize: 14,
+                                            color: const Color(0xFF7A7179),
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  Text(
-                                    'x${e.quantity}  ₹${(e.price * e.quantity).toStringAsFixed(0)}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
+                                  ElevatedButton.icon(
+                                    onPressed: () =>
+                                        _makePhoneCall(order.userPhone),
+                                    icon: const Icon(
+                                      Icons.call,
+                                      size: 18,
+                                      color: Colors.white,
+                                    ),
+                                    label: Text(
+                                      "CALL",
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: primaryColor,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 12,
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-
-                  // Payment Info
-                  const Text(
-                    'PAYMENT DETAILS',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: AppColors.textMuted,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: _cardDecoration(),
-                    child: Column(
-                      children: [
-                        _row('Payment Method', order.paymentMethod),
-                        if (order.paymentMethod == 'UPI') ...[
-                          const SizedBox(height: 8),
-                          _row('Transaction ID', order.transactionId ?? 'N/A'),
-                          const SizedBox(height: 8),
-                          _row('Payment Status', order.paymentStatus),
-                        ],
-                        const Divider(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Total Amount',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              '₹${order.totalAmount.toStringAsFixed(0)}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18,
-                                color: AppColors.primaryUser,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
+                        // Shipping Address
+                        Container(
+                          margin: const EdgeInsets.only(top: 2),
+                          color: Colors.white,
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF3F2F3),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.map,
+                                  color: primaryColor,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Shipping Address",
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color(0xFF151415),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      order.shippingAddress.isNotEmpty
+                                          ? order.shippingAddress
+                                          : "No Address Provided",
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 14,
+                                        color: const Color(0xFF7A7179),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // Order Items
+                        Container(
+                          color: Colors.white,
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Order Items",
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF151415),
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: primaryColor.withValues(
+                                        alpha: 0.1,
+                                      ),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      "${order.items.length} Items",
+                                      style: GoogleFonts.manrope(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: primaryColor,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              ...order.items.map(
+                                (item) => Container(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  decoration: const BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Color(0xFFF3F2F3),
+                                      ),
+                                    ),
+                                  ),
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        width: 80,
+                                        height: 80,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                          image: DecorationImage(
+                                            image: NetworkImage(
+                                              item.image.isNotEmpty
+                                                  ? item.image
+                                                  : "https://via.placeholder.com/80",
+                                            ),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 16),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              item.name,
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: const Color(0xFF151415),
+                                              ),
+                                            ),
+                                            Text(
+                                              "Size: ${item.selectedSize} | Color: ${item.selectedColor}",
+                                              style: GoogleFonts.manrope(
+                                                fontSize: 14,
+                                                color: const Color(0xFF7A7179),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  "₹${item.price}",
+                                                  style: GoogleFonts.manrope(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: primaryColor,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  "Qty: ${item.quantity}",
+                                                  style: GoogleFonts.manrope(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: const Color(
+                                                      0xFF151415,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        // Summary
+                        Container(
+                          color: Colors.white,
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.only(top: 2),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Subtotal",
+                                    style: GoogleFonts.manrope(
+                                      color: const Color(0xFF7A7179),
+                                    ),
+                                  ),
+                                  Text(
+                                    "₹${order.totalAmount}",
+                                    style: GoogleFonts.manrope(
+                                      fontWeight: FontWeight.w600,
+                                      color: const Color(0xFF151415),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Shipping",
+                                    style: GoogleFonts.manrope(
+                                      color: const Color(0xFF7A7179),
+                                    ),
+                                  ),
+                                  Text(
+                                    "FREE",
+                                    style: GoogleFonts.manrope(
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.green,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                child: Divider(color: Color(0xFFEEEEEE)),
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Total Amount",
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF151415),
+                                    ),
+                                  ),
+                                  Text(
+                                    "₹${order.totalAmount}",
+                                    style: GoogleFonts.manrope(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w900,
+                                      color: const Color(0xFF151415),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 100),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 30),
+          ),
+          // Sticky Footer
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.9),
+              border: const Border(top: BorderSide(color: Color(0xFFEEEEEE))),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: _buildFooterButton(order, primaryColor),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-                  // Actions
-                  if (order.orderStatus == 'Ordered')
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : _markPacked,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryUser,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'MARK AS PACKED',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  if (order.orderStatus == 'Packed')
-                    ElevatedButton(
-                      onPressed: _isLoading ? null : _markShipped,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.secondaryUser,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text(
-                        'MARK AS SHIPPED',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                ],
+  Widget _buildFooterButton(OrderModel order, Color primaryColor) {
+    if (order.orderStatus == 'Ordered') {
+      return ElevatedButton(
+        onPressed: _isLoading ? null : _markPacked,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primaryColor,
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.inventory_2, color: Colors.white),
+            const SizedBox(width: 12),
+            Text(
+              'MARK AS PACKED',
+              style: GoogleFonts.manrope(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 1,
               ),
             ),
-    );
-  }
-
-  BoxDecoration _cardDecoration() {
-    return BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.03),
-          blurRadius: 10,
-          offset: const Offset(0, 4),
+          ],
         ),
-      ],
+      );
+    } else if (order.orderStatus == 'Packed') {
+      return ElevatedButton(
+        onPressed: _isLoading ? null : _markShipped,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.secondaryUser,
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.local_shipping, color: Colors.white),
+            const SizedBox(width: 12),
+            Text(
+              'MARK AS SHIPPED',
+              style: GoogleFonts.manrope(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 1,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (order.orderStatus == 'Shipped') {
+      return ElevatedButton(
+        onPressed: _isLoading ? null : _markDelivered,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green,
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 12),
+            Text(
+              'MARK AS DELIVERED',
+              style: GoogleFonts.manrope(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 1,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  Future<void> _editTracking() async {
+    final TextEditingController trackingController = TextEditingController(
+      text: widget.order.trackingId,
+    );
+    // Courier name is not available in OrderModel to prefill, so user must enter it again or we just ask for ID?
+    // markOrderShipped requires courier.
+    final TextEditingController courierController = TextEditingController();
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Update Tracking Details'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: courierController,
+              decoration: const InputDecoration(
+                labelText: 'Courier Name (e.g. BlueDart)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: trackingController,
+              decoration: const InputDecoration(
+                labelText: 'Tracking ID',
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('CANCEL'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (trackingController.text.isEmpty ||
+                  courierController.text.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter all details')),
+                );
+                return;
+              }
+              Navigator.pop(dialogContext);
+              setState(() => _isLoading = true);
+              try {
+                await context.read<DatabaseService>().markOrderShipped(
+                  widget.order.id,
+                  courierController.text,
+                  trackingController.text,
+                  '', // No slip URL update supported here yet, or pass existing?
+                  // markOrderShipped signature: id, courier, trackingId, slipUrl.
+                  // If we pass empty slipUrl, does backend erase it?
+                  // Backend markOrderShipped: status='Shipped', tracking_id=...
+                  // It DOES NOT touch slip_url if not provided?
+                  // Wait, Step 3143: body: {status: 'Shipped', tracking_id: trackingId}.
+                  // It does NOT include slip_url in body construction!
+                  // It takes slipUrl as argument but ignores it in body construction!
+                  // Wait. Line 123 in Step 3143: body: jsonEncode({'status': 'Shipped', 'tracking_id': trackingId})
+                  // Params: String slipUrl (line 118).
+                  // So slipUrl IS IGNORED. So passing empty string is safe.
+                );
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Tracking Updated')),
+                  );
+                  Navigator.pop(context); // Go back to refresh? Or stay?
+                  // Usually StreamBuilder updates automatically.
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                }
+              } finally {
+                if (mounted) setState(() => _isLoading = false);
+              }
+            },
+            child: const Text('UPDATE'),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _row(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label, style: const TextStyle(color: AppColors.textMuted)),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
-      ],
-    );
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'Ordered':
-        return Colors.blue;
-      case 'Packed':
-        return Colors.orange;
-      case 'Shipped':
-        return Colors.purple;
-      case 'Delivered':
-        return Colors.green;
-      default:
-        return Colors.grey;
+  Future<void> _markDelivered() async {
+    setState(() => _isLoading = true);
+    try {
+      await context.read<DatabaseService>().confirmDelivery(widget.order.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Order marked as Delivered')),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 }

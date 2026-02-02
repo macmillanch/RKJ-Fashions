@@ -27,7 +27,7 @@ class AdminPaymentVerificationScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Order #${order.id.substring(0, 8)} Details',
+          'Order #${order.id} Details',
           style: const TextStyle(
             color: AppColors.textUser,
             fontWeight: FontWeight.bold,

@@ -16,10 +16,10 @@ app.get('/', (req, res) => {
 
 app.get('/api/app-version', (req, res) => {
     res.json({
-        version: "1.1.1",
-        url: "https://ladies-boutique-backend.onrender.com/downloads/rkj-fashions-v1.1.1.apk",
+        version: "1.1.2",
+        url: "https://ladies-boutique-backend.onrender.com/downloads/rkj-fashions-v1.1.2.apk",
         forceUpdate: true,
-        releaseNotes: "RKJ Fashions v1.1.1: Critical Fix for Manage Orders (Crash resolved)."
+        releaseNotes: "RKJ Fashions v1.1.2: General improvements and bug fixes."
     });
 });
 
@@ -251,7 +251,7 @@ app.put('/api/users/:id', async (req, res) => {
     }
 });
 
-// Admin Promotion (Debug only - normally requires auth)
+
 
 // --- ORDER ROUTES ---
 app.get('/api/orders', async (req, res) => {

@@ -221,7 +221,7 @@ class _ContactScreenState extends State<ContactScreen> {
         _settings['shop_address'] ??
         '123 Blossom Avenue, Suite 100\nNew York, NY 10012';
     final shopPhone = _settings['shop_phone'] ?? '+91 98765 43210';
-    final shopEmail = _settings['shop_email'] ?? 'hello@boutique.com';
+    final shopEmail = _settings['shop_email'] ?? 'hello@krjfashions.com';
     final shopInsta = _settings['shop_instagram'] ?? '@rkj_fashions';
     final shopFacebook =
         _settings['shop_facebook'] ?? 'https://facebook.com/rkjfashions';

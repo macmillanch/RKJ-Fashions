@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:flutter/foundation.dart';
 import '../../main.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -16,6 +17,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    if (kIsWeb) {
+      _navigateToHome();
+      return;
+    }
     _controller = VideoPlayerController.asset('assets/videos/splash.mp4')
       ..initialize().then((_) {
         setState(() {

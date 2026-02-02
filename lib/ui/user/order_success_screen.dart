@@ -126,7 +126,7 @@ class _OrderSuccessScreenState extends State<OrderSuccessScreen>
                             children: [
                               _buildInfoColumn(
                                 'Order ID',
-                                '#${widget.orderId.substring(0, 8)}',
+                                '#${widget.orderId}',
                               ),
                               _buildInfoColumn(
                                 'Est. Delivery',

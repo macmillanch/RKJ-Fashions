@@ -281,6 +281,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   MaterialPageRoute(builder: (_) => const HelpScreen()),
                 ),
               ),
+
               _buildMenuItem(context, Icons.logout, 'Log Out', () async {
                 await context.read<AuthService>().signOut();
                 if (context.mounted) {

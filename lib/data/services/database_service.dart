@@ -151,13 +151,18 @@ class DatabaseService {
           'x-rapidapi-key': apiKey,
         },
       );
+      debugPrint(
+        'Tracking Response: ${response.statusCode} - ${response.body}',
+      );
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
+      } else {
+        return {'error': 'API Error: ${response.statusCode}'};
       }
     } catch (e) {
       debugPrint('Tracking Error: $e');
+      return {'error': 'Network Error: $e'};
     }
-    return {};
   }
 
   // Wishlist
