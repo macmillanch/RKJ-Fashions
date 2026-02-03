@@ -137,7 +137,7 @@ class MyAddressesScreen extends StatelessWidget {
                               style: const TextStyle(color: AppColors.textUser),
                             ),
                             Text(
-                              '${addr['city']} - ${addr['pincode']}',
+                              '${addr['city']} - ${addr['zip'] ?? addr['pincode'] ?? ''}',
                               style: const TextStyle(color: AppColors.textUser),
                             ),
                             Text(
@@ -151,14 +151,34 @@ class MyAddressesScreen extends StatelessWidget {
                         ),
                       ),
                       if (!isSelectionMode)
-                        IconButton(
-                          icon: const Icon(
-                            Icons.delete_outline,
-                            color: Colors.red,
-                          ),
-                          onPressed: () async {
-                            await db.deleteAddress(user.id, addr['id']);
-                          },
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(
+                                Icons.edit_outlined,
+                                color: Colors.blue,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        AddAddressScreen(existingAddress: addr),
+                                  ),
+                                );
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: Colors.red,
+                              ),
+                              onPressed: () async {
+                                await db.deleteAddress(user.id, addr['id']);
+                              },
+                            ),
+                          ],
                         ),
                     ],
                   ),

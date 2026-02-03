@@ -16,10 +16,10 @@ app.get('/', (req, res) => {
 
 app.get('/api/app-version', (req, res) => {
     res.json({
-        version: "1.1.2",
-        url: "https://ladies-boutique-backend.onrender.com/downloads/rkj-fashions-v1.1.2.apk",
+        version: "1.1.3",
+        url: "https://ladies-boutique-backend.onrender.com/downloads/rkj-fashions-v1.1.3.apk",
         forceUpdate: true,
-        releaseNotes: "RKJ Fashions v1.1.2: General improvements and bug fixes."
+        releaseNotes: "RKJ Fashions v1.1.3: Added Edit Address feature and bug fixes."
     });
 });
 
@@ -358,11 +358,11 @@ app.get('/api/addresses/:userId', async (req, res) => {
 
 app.post('/api/addresses', async (req, res) => {
     // EXTRACT AND MAP FRONTEND KEYS TO DB COLUMNS
-    const { userId, user_id, name, phone, address1, address2, street, city, state, zip, pincode, isDefault, is_default } = req.body;
+    const { userId, user_id, name, phone, address1, address2, landmark, street, city, state, zip, pincode, isDefault, is_default } = req.body;
 
     // Robust fallback logic
     const finalUserId = userId || user_id;
-    const finalStreet = street || (address1 ? `${address1}${address2 ? ', ' + address2 : ''}` : '');
+    const finalStreet = street || (address1 ? `${address1}${address2 ? ', ' + address2 : ''}${landmark ? ', ' + landmark : ''}` : '');
     const finalZip = zip || pincode;
     const finalIsDefault = (isDefault !== undefined) ? isDefault : ((is_default !== undefined) ? is_default : false);
 
@@ -379,6 +379,39 @@ app.post('/api/addresses', async (req, res) => {
         res.status(201).json(result.rows[0]);
     } catch (err) {
         console.error("Address Save Error:", err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.put('/api/addresses/:userId/:addressId', async (req, res) => {
+    const { userId, addressId } = req.params;
+    const { name, phone, address1, address2, landmark, street, city, state, zip, pincode, isDefault } = req.body;
+
+    // Fallback logic
+    const finalStreet = street || (address1 ? `${address1}${address2 ? ', ' + address2 : ''}${landmark ? ', ' + landmark : ''}` : '');
+    const finalZip = zip || pincode;
+
+    try {
+        if (isDefault) {
+            await db.query('UPDATE addresses SET is_default = FALSE WHERE user_id = $1', [userId]);
+        }
+
+        const result = await db.query(
+            `UPDATE addresses SET 
+             name = COALESCE($1, name), 
+             phone = COALESCE($2, phone), 
+             street = COALESCE($3, street), 
+             city = COALESCE($4, city), 
+             state = COALESCE($5, state), 
+             zip = COALESCE($6, zip), 
+             is_default = COALESCE($7, is_default)
+             WHERE id = $8 AND user_id = $9 RETURNING *`,
+            [name, phone, finalStreet, city, state, finalZip, isDefault, addressId, userId]
+        );
+
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Address not found' });
+        res.json(result.rows[0]);
+    } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });

@@ -7,7 +7,8 @@ import '../../data/services/auth_service.dart';
 import '../../data/services/database_service.dart';
 
 class AddAddressScreen extends StatefulWidget {
-  const AddAddressScreen({super.key});
+  final Map<String, dynamic>? existingAddress;
+  const AddAddressScreen({super.key, this.existingAddress});
 
   @override
   State<AddAddressScreen> createState() => _AddAddressScreenState();
@@ -68,6 +69,31 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   void initState() {
     super.initState();
     _pincodeController.addListener(_onPincodeChanged);
+
+    if (widget.existingAddress != null) {
+      final addr = widget.existingAddress!;
+      _nameController.text = addr['name'] ?? '';
+      _phoneController.text = addr['phone'] ?? '';
+      _pincodeController.text = (addr['zip'] ?? addr['pincode'] ?? '')
+          .toString();
+      _cityController.text = addr['city'] ?? '';
+      _selectedState = addr['state'];
+      _isDefault = addr['is_default'] ?? false;
+
+      // Parsing street address back into parts is tricky as it's stored as one string.
+      // We will put the full street into address1 and let the user edit it.
+      // address2 and landmark will be empty initially in edit mode unless we parse logic.
+      // For simplicity, we put everything in Address 1 for now or try to split if CSV.
+      String fullStreet = addr['street'] ?? '';
+      List<String> parts = fullStreet.split(', ');
+
+      if (parts.isNotEmpty) {
+        _address1Controller.text = parts[0];
+        if (parts.length > 1) _address2Controller.text = parts[1];
+        if (parts.length > 2)
+          _landmarkController.text = parts.sublist(2).join(', ');
+      }
+    }
   }
 
   void _onPincodeChanged() {
@@ -170,13 +196,21 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         'city': _cityController.text,
         'state': _selectedState,
         'isDefault': _isDefault,
-        'createdAt': DateTime.now().toIso8601String(),
       };
 
-      await context
-          .read<DatabaseService>()
-          .addAddress(user.id, addressData)
-          .timeout(const Duration(seconds: 10));
+      if (widget.existingAddress != null) {
+        await context.read<DatabaseService>().updateAddress(
+          user.id,
+          widget.existingAddress!['id'].toString(),
+          addressData,
+        );
+      } else {
+        addressData['createdAt'] = DateTime.now().toIso8601String();
+        await context
+            .read<DatabaseService>()
+            .addAddress(user.id, addressData)
+            .timeout(const Duration(seconds: 10));
+      }
 
       if (mounted) {
         Navigator.pop(context);
@@ -192,13 +226,14 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool isEditing = widget.existingAddress != null;
     return Scaffold(
       backgroundColor: AppColors.backgroundUser,
       appBar: AppBar(
         backgroundColor: Colors.white.withValues(alpha: 0.95),
-        title: const Text(
-          'Add Delivery Address',
-          style: TextStyle(
+        title: Text(
+          isEditing ? 'Edit Address' : 'Add Delivery Address',
+          style: const TextStyle(
             color: AppColors.textUser,
             fontWeight: FontWeight.bold,
             fontFamily: 'Epilogue',

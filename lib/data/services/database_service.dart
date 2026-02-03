@@ -235,6 +235,21 @@ class DatabaseService {
     }
   }
 
+  Future<void> updateAddress(
+    String userId,
+    String addressId,
+    Map<String, dynamic> addressData,
+  ) async {
+    final response = await http.put(
+      Uri.parse('$_baseUrl/addresses/$userId/$addressId'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(addressData),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update address');
+    }
+  }
+
   Future<void> deleteAddress(String userId, String addressId) async {
     final response = await http.delete(
       Uri.parse('$_baseUrl/addresses/$userId/$addressId'),
