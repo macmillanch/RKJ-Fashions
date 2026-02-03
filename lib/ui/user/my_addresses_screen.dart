@@ -133,7 +133,7 @@ class MyAddressesScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${addr['address1']}, ${addr['address2']}',
+                              addr['street'] ?? '',
                               style: const TextStyle(color: AppColors.textUser),
                             ),
                             Text(
@@ -175,7 +175,10 @@ class MyAddressesScreen extends StatelessWidget {
                                 color: Colors.red,
                               ),
                               onPressed: () async {
-                                await db.deleteAddress(user.id, addr['id']);
+                                await db.deleteAddress(
+                                  user.id,
+                                  addr['id'].toString(),
+                                );
                               },
                             ),
                           ],

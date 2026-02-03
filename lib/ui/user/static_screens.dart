@@ -207,7 +207,9 @@ class _ContactScreenState extends State<ContactScreen> {
   }
 
   Future<void> _openMap() async {
-    const url = 'https://maps.app.goo.gl/c5GPZQvUA3sT86H38';
+    // URL derived from user's request for RKJ Fashions in Mizoram
+    const url =
+        'https://www.google.com/maps/search/?api=1&query=RKJ+Fashions+Near+RCM+School+Kamalanagar+V,+Mizoram+796770';
     await _launchUrl(url);
   }
 
@@ -219,7 +221,7 @@ class _ContactScreenState extends State<ContactScreen> {
 
     final shopAddress =
         _settings['shop_address'] ??
-        '123 Blossom Avenue, Suite 100\nNew York, NY 10012';
+        'Near RCM School Kamalanagar V,\nMizoram 796770';
     final shopPhone = _settings['shop_phone'] ?? '+91 98765 43210';
     final shopEmail = _settings['shop_email'] ?? 'hello@krjfashions.com';
     final shopInsta = _settings['shop_instagram'] ?? '@rkj_fashions';
@@ -435,38 +437,34 @@ class _ContactScreenState extends State<ContactScreen> {
                         ],
                       ),
                       const SizedBox(height: 24),
-                      Row(
+                      Column(
                         children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: _openMap,
-                              icon: const Icon(Icons.near_me),
-                              label: const Text('Directions'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primaryUser,
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size(double.infinity, 56),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
+                          ElevatedButton.icon(
+                            onPressed: _openMap,
+                            icon: const Icon(Icons.near_me),
+                            label: const Text('Directions'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryUser,
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(double.infinity, 56),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () => _makePhoneCall(shopPhone),
-                              icon: const Icon(Icons.call),
-                              label: const Text('Call Now'),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.primaryUser,
-                                minimumSize: const Size(double.infinity, 56),
-                                side: const BorderSide(
-                                  color: AppColors.primaryUser,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
+                          const SizedBox(height: 12),
+                          OutlinedButton.icon(
+                            onPressed: () => _makePhoneCall(shopPhone),
+                            icon: const Icon(Icons.call),
+                            label: const Text('Call Now'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primaryUser,
+                              minimumSize: const Size(double.infinity, 56),
+                              side: const BorderSide(
+                                color: AppColors.primaryUser,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                           ),
