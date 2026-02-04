@@ -1,5 +1,5 @@
 {
-    "name": "ladies-boutique-backend",
+    "name": "rkj-fashions-backend",
     "version": "1.0.0",
     "description": "Node.js backend for Ladies Boutique App",
     "main": "server.js",
