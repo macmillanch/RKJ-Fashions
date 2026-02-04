@@ -303,6 +303,17 @@ class DatabaseService {
     await http.put(Uri.parse('$_baseUrl/notifications/read/$userId'));
   }
 
+  Future<void> sendNotification(
+    String userId,
+    Map<String, dynamic> data,
+  ) async {
+    await http.post(
+      Uri.parse('$_baseUrl/notifications'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'userId': userId, ...data}),
+    );
+  }
+
   Future<Map<String, dynamic>> getSettings() async {
     final response = await http.get(Uri.parse('$_baseUrl/settings'));
     if (response.statusCode == 200) {

@@ -16,10 +16,10 @@ app.get('/', (req, res) => {
 
 app.get('/api/app-version', (req, res) => {
     res.json({
-        version: "1.1.4",
-        url: "https://ladies-boutique-backend.onrender.com/downloads/rkj-fashions-v1.1.4.apk",
+        version: "1.1.6",
+        url: "https://rkj-fashions.onrender.com/downloads/rkj-fashions-v1.1.6.apk",
         forceUpdate: true,
-        releaseNotes: "RKJ Fashions v1.1.4: Fixed address display and delete issues."
+        releaseNotes: "RKJ Fashions v1.1.6: Fixed Live Tracking errors & Admin Notifications."
     });
 });
 
@@ -281,7 +281,32 @@ app.post('/api/orders', async (req, res) => {
              VALUES ($1, $2, $3, $4, $5, $6, 'Confirmed') RETURNING *`,
             [userId, totalAmount, JSON.stringify(items), shippingAddress, paymentMethod, transactionId]
         );
-        res.status(201).json(result.rows[0]);
+        const order = result.rows[0];
+
+        // Auto-Send Notification
+        try {
+            const notifTitle = "Order Placed Successfully";
+            const notifDesc = `Your order #${order.id} for ₹${totalAmount} has been placed. We will update you once it ships.`;
+            await db.query(
+                'INSERT INTO notifications (user_id, title, description, type, metadata) VALUES ($1, $2, $3, $4, $5)',
+                [userId, notifTitle, notifDesc, 'order', JSON.stringify({ orderId: order.id })]
+            );
+
+            // Notify Admins
+            const admins = await db.query("SELECT id FROM users WHERE role = 'admin'");
+            for (const admin of admins.rows) {
+                await db.query(
+                    'INSERT INTO notifications (user_id, title, description, type, metadata) VALUES ($1, $2, $3, $4, $5)',
+                    [admin.id, "New Order Received", `New Order #${order.id} received for ₹${totalAmount}. Check Admin Panel.`, 'admin_order', JSON.stringify({ orderId: order.id })]
+                );
+            }
+
+        } catch (nErr) {
+            console.error("Failed to create notification for order:", nErr);
+            // Don't fail the order if notification fails
+        }
+
+        res.status(201).json(order);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

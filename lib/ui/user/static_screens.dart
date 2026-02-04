@@ -207,9 +207,9 @@ class _ContactScreenState extends State<ContactScreen> {
   }
 
   Future<void> _openMap() async {
-    // URL derived from user's request for RKJ Fashions in Mizoram
+    // Precise coordinates from user's latest request
     const url =
-        'https://www.google.com/maps/search/?api=1&query=RKJ+Fashions+Near+RCM+School+Kamalanagar+V,+Mizoram+796770';
+        'https://www.google.com/maps/search/?api=1&query=22.6104869,92.6409908';
     await _launchUrl(url);
   }
 
@@ -267,8 +267,9 @@ class _ContactScreenState extends State<ContactScreen> {
                       ),
                     ],
                     image: const DecorationImage(
+                      // Generic map background instead of specific mall
                       image: NetworkImage(
-                        'https://lh3.googleusercontent.com/aida-public/AB6AXuBViZ0yU-HS3Pg5LU8V-FCQ4Ad4qAYeaKnayftZkC6mSQhVcWYTDtsObRNHXpTwzrwKiwVMqAaGwm7SVrzp0bO9GRQmIqDWqN1xiqmBAtLi61Tf0qymev1q3LRKFp0vJyXbDGkJlkiQEkb_eCoxDnTxAuSPDKbO8YH-qRPH1bJucFgrWVlJiFdgqB7YvxQToCjFApJ40cjm8tuzsz8Q9Ho5oeJIRhCJk7TvFYE8hFTm40i1OoBcs32WVe-IcwLSNQKPh0iMmrbOTWw',
+                        'https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop',
                       ),
                       fit: BoxFit.cover,
                     ),
