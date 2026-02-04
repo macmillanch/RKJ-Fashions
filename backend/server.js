@@ -99,6 +99,17 @@ app.post('/api/auth/signup', async (req, res) => {
 
         const user = result.rows[0];
 
+        // Create Welcome Notification
+        try {
+            await db.query(
+                "INSERT INTO notifications (user_id, title, description, type, metadata) VALUES ($1, $2, $3, $4, $5)",
+                [user.id, "Welcome to RKJ Fashions!", "Your account has been successfully created. Happy Shopping!", "welcome", "{}"]
+            );
+        } catch (notifErr) {
+            console.error("Failed to create welcome notification:", notifErr);
+            // Non-blocking, continue
+        }
+
         // MOCK JWT for now
         res.status(201).json({
             token: 'mock-jwt-token',

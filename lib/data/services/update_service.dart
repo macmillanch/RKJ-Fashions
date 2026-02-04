@@ -90,11 +90,18 @@ class UpdateService {
             ],
           ),
           actions: [
-            if (!forceUpdate)
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Later'),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
               ),
+              child: const Text('Not Now'),
+            ),
             ElevatedButton(
               onPressed: () async {
                 final uri = Uri.parse(url);
@@ -103,7 +110,7 @@ class UpdateService {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
+                backgroundColor: Colors.green,
                 foregroundColor: Colors.white,
               ),
               child: const Text('Update Now'),
