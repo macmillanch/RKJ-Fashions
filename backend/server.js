@@ -186,6 +186,16 @@ app.post('/api/auth/google', async (req, res) => {
                 [email, name, photoUrl, randomPwd, '']
             );
             user = result.rows[0];
+
+            // Create Welcome Notification for Google Signup
+            try {
+                await db.query(
+                    "INSERT INTO notifications (user_id, title, description, type, metadata) VALUES ($1, $2, $3, $4, $5)",
+                    [user.id, "Welcome to RKJ Fashions!", "Your account has been successfully created via Google. Happy Shopping!", "welcome", "{}"]
+                );
+            } catch (notifErr) {
+                console.error("Failed to create welcome notification:", notifErr);
+            }
         }
 
         res.json({
