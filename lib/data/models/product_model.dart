@@ -7,6 +7,7 @@ class Product {
   final List<String> colors;
   final List<String> images;
   final String description;
+  final String category;
   final bool isAvailable;
 
   Product({
@@ -18,6 +19,7 @@ class Product {
     required this.colors,
     required this.images,
     required this.description,
+    this.category = 'General',
     this.isAvailable = true,
   });
 
@@ -33,6 +35,7 @@ class Product {
       'colors': colors,
       'image_urls': images,
       'description': description,
+      'category': category,
       'is_available': isAvailable,
     };
   }
@@ -45,10 +48,9 @@ class Product {
       discount: double.tryParse(json['discount'].toString()) ?? 0.0,
       sizes: List<String>.from(json['sizes'] ?? []),
       colors: List<String>.from(json['colors'] ?? []),
-      images: List<String>.from(
-        json['image_urls'] ?? [],
-      ), // Adjusted key based on backend
+      images: List<String>.from(json['image_urls'] ?? []),
       description: json['description'] ?? '',
+      category: json['category'] ?? 'General',
       isAvailable: json['is_available'] ?? true,
     );
   }

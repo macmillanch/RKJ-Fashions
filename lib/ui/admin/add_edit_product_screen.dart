@@ -20,6 +20,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   late TextEditingController _priceCtrl;
   late TextEditingController _discountCtrl;
   late TextEditingController _descCtrl;
+  late TextEditingController _categoryCtrl;
   List<String> _imageUrls = [];
   bool _isAvailable = true;
   bool _isLoading = false;
@@ -38,6 +39,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
       text: widget.product?.discount.toString() ?? '',
     );
     _descCtrl = TextEditingController(text: widget.product?.description ?? '');
+    _categoryCtrl = TextEditingController(text: widget.product?.category ?? '');
     _imageUrls = widget.product?.images ?? [];
 
     if (widget.product != null) {
@@ -132,6 +134,9 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
           .toList(),
       images: _imageUrls,
       description: _descCtrl.text.trim(),
+      category: _categoryCtrl.text.trim().isEmpty
+          ? 'General'
+          : _categoryCtrl.text.trim(),
       isAvailable: _isAvailable,
     );
 
@@ -408,6 +413,15 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                   // Colors
                   _buildInputLabel('Colors'),
                   _buildPremiumInput(_colorsCtrl, 'Red, Blue, Green'),
+
+                  const SizedBox(height: 16),
+
+                  // Category
+                  _buildInputLabel('Category'),
+                  _buildPremiumInput(
+                    _categoryCtrl,
+                    'e.g. Kurtas, Sarees, Western',
+                  ),
 
                   const SizedBox(height: 16),
 

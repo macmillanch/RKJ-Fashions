@@ -484,11 +484,11 @@ app.get('/api/products', async (req, res) => {
 
 app.post('/api/products', async (req, res) => {
     // Admin Only TODO: Middleware
-    const { name, price, description, sizes, colors, image_urls, is_available } = req.body;
+    const { name, price, description, sizes, colors, image_urls, is_available, category } = req.body;
     try {
         const result = await db.query(
-            'INSERT INTO products (name, price, description, sizes, colors, image_urls, is_available) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
-            [name, price, description, JSON.stringify(sizes), JSON.stringify(colors), JSON.stringify(image_urls), is_available]
+            'INSERT INTO products (name, price, description, sizes, colors, image_urls, is_available, category) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+            [name, price, description, JSON.stringify(sizes), JSON.stringify(colors), JSON.stringify(image_urls), is_available, category]
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
@@ -498,11 +498,11 @@ app.post('/api/products', async (req, res) => {
 
 app.put('/api/products/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, price, description, sizes, colors, image_urls, is_available } = req.body;
+    const { name, price, description, sizes, colors, image_urls, is_available, category } = req.body;
     try {
         const result = await db.query(
-            'UPDATE products SET name = $1, price = $2, description = $3, sizes = $4, colors = $5, image_urls = $6, is_available = $7 WHERE id = $8 RETURNING *',
-            [name, price, description, JSON.stringify(sizes), JSON.stringify(colors), JSON.stringify(image_urls), is_available, id]
+            'UPDATE products SET name = $1, price = $2, description = $3, sizes = $4, colors = $5, image_urls = $6, is_available = $7, category = $8 WHERE id = $9 RETURNING *',
+            [name, price, description, JSON.stringify(sizes), JSON.stringify(colors), JSON.stringify(image_urls), is_available, category, id]
         );
         if (result.rows.length === 0) return res.status(404).json({ error: 'Product not found' });
         res.json(result.rows[0]);

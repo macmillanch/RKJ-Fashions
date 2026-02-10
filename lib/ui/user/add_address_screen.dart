@@ -90,8 +90,9 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
       if (parts.isNotEmpty) {
         _address1Controller.text = parts[0];
         if (parts.length > 1) _address2Controller.text = parts[1];
-        if (parts.length > 2)
+        if (parts.length > 2) {
           _landmarkController.text = parts.sublist(2).join(', ');
+        }
       }
     }
   }
