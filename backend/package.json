@@ -1,6 +1,6 @@
 {
     "name": "rkj-fashions-backend",
-    "version": "1.0.0",
+    "version": "1.1.8",
     "description": "Node.js backend for RKJ Fashions App",
     "main": "server.js",
     "scripts": {

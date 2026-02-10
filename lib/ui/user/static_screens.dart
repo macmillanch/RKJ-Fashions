@@ -44,6 +44,8 @@ class AboutScreen extends StatelessWidget {
                   Image.network(
                     'https://lh3.googleusercontent.com/aida-public/AB6AXuC1hnbmhLVMQ7oeeUpStB_bipo9QnBcEwpG3AU9-jXrJe3n7a-eoGXBgQEm3czMxG7L5j02ToFuarDCw4soivexbpGP5xihjWWIXCJqOy8X8rCDvjyUKRSzBTuLPumOcmuMSv2bChCILOJURLv-4KLJX6TePM1k-Ju6UOAfxuouF4FqUrliqBdUca863gDTiiPvfp5g8L8zzDMRMjk1hHUORURmK__F2caED09mp0Jk37WNoqRG7aIxvoSYmmrF0UCv3dHkmBMYGvk',
                     fit: BoxFit.cover,
+                    errorBuilder: (c, e, s) =>
+                        Container(color: AppColors.primaryUser),
                   ),
                   Container(
                     decoration: BoxDecoration(
@@ -266,12 +268,13 @@ class _ContactScreenState extends State<ContactScreen> {
                         offset: const Offset(0, 10),
                       ),
                     ],
-                    image: const DecorationImage(
+                    image: DecorationImage(
                       // Generic map background instead of specific mall
                       image: NetworkImage(
                         'https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop',
                       ),
                       fit: BoxFit.cover,
+                      onError: (e, s) => debugPrint('Map image load failed'),
                     ),
                   ),
                   child: Stack(
@@ -633,11 +636,12 @@ class HelpScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.grey[200],
                 borderRadius: BorderRadius.circular(20),
-                image: const DecorationImage(
+                image: DecorationImage(
                   image: NetworkImage(
                     'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=2070&auto=format&fit=crop',
                   ),
                   fit: BoxFit.cover,
+                  onError: (e, s) => debugPrint('Help image load failed'),
                 ),
               ),
               child: Container(

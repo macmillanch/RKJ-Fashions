@@ -293,12 +293,26 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                                   fit: BoxFit.cover,
                                   color: Colors.white.withValues(alpha: 0.8),
                                   colorBlendMode: BlendMode.multiply,
+                                  errorBuilder: (c, e, s) => const Center(
+                                    child: Icon(
+                                      Icons.receipt_long,
+                                      size: 50,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
                                 )
                               : Image.network(
                                   'https://lh3.googleusercontent.com/aida-public/AB6AXuCA2jBhPPZiHbNgpPemDIwr7nDfzhik6yA_1B37UvCZXncY3gq3K3VxlcYcUle0chE7HRf2fybN2fVABlAhoYLFGM79laLYIi3f1bs_taTtEUHvcx7g8i_YkcbGn2v4kjdzfz5s_Ahw5tNS4x79KrFZbP3vqUpcEjcoQR5qVI_UTyTd6i9fCY2ugJK-xlN0b2Nrkt11jCXuZumHo7x1LGPUhoTVOfPFkAO6n35jSDZLaqu8uk6TYanGgLWy0V17-A_YCrpFUgmxxvA',
                                   fit: BoxFit.cover,
                                   color: Colors.white.withValues(alpha: 0.8),
                                   colorBlendMode: BlendMode.multiply,
+                                  errorBuilder: (c, e, s) => const Center(
+                                    child: Icon(
+                                      Icons.receipt_long,
+                                      size: 50,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
                                 ),
                         ),
                       ),
@@ -517,6 +531,8 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
                               "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Google_Play_2022_logo.svg/512px-Google_Play_2022_logo.svg.png",
                               width: 24,
                               height: 24,
+                              errorBuilder: (c, e, s) =>
+                                  const Icon(Icons.shop, size: 24),
                             ),
                             onTap: () => _launchUrl(
                               context,

@@ -14,8 +14,8 @@ flutter clean
 Write-Host "Running Flutter Pub Get..."
 flutter pub get
 
-Write-Host "Building Android APK (Debug)..."
-flutter build apk --debug
+Write-Host "Building Android APK (Release)..."
+flutter build apk --release
 
 Write-Host "Build process completed. Check for any errors above."
 Read-Host -Prompt "Press Enter to exit"
