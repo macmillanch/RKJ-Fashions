@@ -1,5 +1,5 @@
 class AppConstants {
-  static const String appName = 'Ladies Boutique';
+  static const String appName = 'RKJ Fashions';
 
   // India Post
   static const String indiaPostName = 'India Post – Dak Seva Jan Seva';

@@ -11,7 +11,7 @@ app.use('/downloads', express.static('public/downloads'));
 
 // Basic Route
 app.get('/', (req, res) => {
-    res.json({ message: 'Ladies Boutique API is running' });
+    res.json({ message: 'RKJ Fashions API is running' });
 });
 
 app.get('/api/app-version', (req, res) => {
