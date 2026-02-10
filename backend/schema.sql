@@ -112,14 +112,14 @@ CREATE TABLE IF NOT EXISTS settings (
 
 -- Seed Initial Admin
 INSERT INTO users (phone, email, password, role, name) 
-VALUES ('9876543210', 'admin@rkj.com', '$2b$10$YourHashedPasswordHere', 'admin', 'RKJ Admin')
+VALUES ('9876543210', 'admin@rkjfashions.com', '$2b$10$YourHashedPasswordHere', 'admin', 'RKJ Admin')
 ON CONFLICT (email) DO NOTHING;
 
 
 -- Seed Default Settings
 INSERT INTO settings (key, value) VALUES 
 ('shop_name', 'RKJ Fashions'),
-('shop_email', 'admin@rkj.com'),
+('shop_email', 'admin@rkjfashions.com'),
 ('shop_phone', '9876543210'),
 ('shop_address', '123 Blossom Avenue, Suite 100, New York, NY 10012'),
 ('upi_id', 'username@bank'),
