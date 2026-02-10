@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/services/database_service.dart';
+import '../../data/services/storage_service.dart';
 
 class AdminShopSettingsScreen extends StatefulWidget {
   const AdminShopSettingsScreen({super.key});
@@ -23,6 +25,7 @@ class _AdminShopSettingsScreenState extends State<AdminShopSettingsScreen> {
   final TextEditingController _facebookCtrl = TextEditingController();
 
   bool _isLoading = true;
+  bool _isUploading = false;
 
   @override
   void initState() {
@@ -53,6 +56,31 @@ class _AdminShopSettingsScreenState extends State<AdminShopSettingsScreen> {
           context,
         ).showSnackBar(SnackBar(content: Text('Failed to load settings: $e')));
         setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> _pickQRCode() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() => _isUploading = true);
+      try {
+        String url = await StorageService().uploadImage(image, 'qr_codes');
+        if (!mounted) return;
+        setState(() {
+          _qrUrlCtrl.text = url;
+          _isUploading = false;
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('QR Code uploaded!')));
+      } catch (e) {
+        if (!mounted) return;
+        setState(() => _isUploading = false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Upload failed: $e')));
       }
     }
   }
@@ -168,6 +196,13 @@ class _AdminShopSettingsScreenState extends State<AdminShopSettingsScreen> {
               icon: Icons.qr_code_scanner,
               children: [
                 _buildTextField('QR Code URL', 'https://...', _qrUrlCtrl),
+                const SizedBox(height: 12),
+                _buildActionButton(
+                  _isUploading ? 'UPLOADING...' : 'UPLOAD QR FROM DEVICE',
+                  Icons.upload_file,
+                  _isUploading ? () {} : _pickQRCode,
+                  isOutlined: true,
+                ),
                 const SizedBox(height: 24),
 
                 Container(
