@@ -210,11 +210,7 @@ class _AdminShopSettingsScreenState extends State<AdminShopSettingsScreen> {
                   _boutiqueNameCtrl,
                 ),
                 const SizedBox(height: 16),
-                _buildTextField(
-                  'Contact Email',
-                  'admin@boutique.com',
-                  _emailCtrl,
-                ),
+                _buildTextField('Contact Email', 'admin@rkj.com', _emailCtrl),
                 const SizedBox(height: 16),
                 _buildTextField(
                   'Instagram Handle',
