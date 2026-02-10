@@ -375,8 +375,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               onTap: () => setState(() => _selectedSize = size),
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
-                                width: 50,
-                                height: 50,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 12,
+                                ),
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   color: isSelected

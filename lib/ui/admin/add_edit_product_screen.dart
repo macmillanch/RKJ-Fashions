@@ -411,7 +411,20 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
 
                   // Sizes
                   _buildInputLabel('Available Sizes'),
-                  _buildPremiumInput(_sizesCtrl, 'S, M, L, XL'),
+
+                  // Presets
+                  Row(
+                    children: [
+                      _buildSizePresetChip('Kids'),
+                      const SizedBox(width: 10),
+                      _buildSizePresetChip('Adults'),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  _buildPremiumInput(
+                    _sizesCtrl,
+                    'Enter sizes e.g. Kids, Adults or S, M, L',
+                  ),
 
                   const SizedBox(height: 16),
 
@@ -511,6 +524,31 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSizePresetChip(String label) {
+    final bool isSelected = _sizesCtrl.text.contains(label);
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (bool selected) {
+        List<String> current = _sizesCtrl.text
+            .split(',')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+        if (selected) {
+          if (!current.contains(label)) current.add(label);
+        } else {
+          current.remove(label);
+        }
+        setState(() {
+          _sizesCtrl.text = current.join(', ');
+        });
+      },
+      selectedColor: AppColors.primaryUser.withValues(alpha: 0.2),
+      checkmarkColor: AppColors.primaryUser,
     );
   }
 
