@@ -8,6 +8,7 @@ class Product {
   final List<String> images;
   final String description;
   final String category;
+  final int stockQuantity;
   final bool isAvailable;
 
   Product({
@@ -20,10 +21,12 @@ class Product {
     required this.images,
     required this.description,
     this.category = 'General',
+    this.stockQuantity = 0,
     this.isAvailable = true,
   });
 
   double get discountedPrice => price - (price * discount / 100);
+  bool get isSoldOut => stockQuantity <= 0;
 
   Map<String, dynamic> toJson() {
     return {
@@ -36,6 +39,7 @@ class Product {
       'image_urls': images,
       'description': description,
       'category': category,
+      'stock_quantity': stockQuantity,
       'is_available': isAvailable,
     };
   }
@@ -51,6 +55,7 @@ class Product {
       images: List<String>.from(json['image_urls'] ?? []),
       description: json['description'] ?? '',
       category: json['category'] ?? 'General',
+      stockQuantity: int.tryParse(json['stock_quantity'].toString()) ?? 0,
       isAvailable: json['is_available'] ?? true,
     );
   }

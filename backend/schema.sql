@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS products (
     image_urls JSONB,
     is_available BOOLEAN DEFAULT TRUE,
     category VARCHAR(100) DEFAULT 'General',
+    stock_quantity INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

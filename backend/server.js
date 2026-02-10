@@ -304,6 +304,18 @@ app.post('/api/orders', async (req, res) => {
         );
         const order = result.rows[0];
 
+        // Decrease stock quantity
+        try {
+            for (const item of items) {
+                await db.query(
+                    'UPDATE products SET stock_quantity = GREATEST(0, stock_quantity - $1) WHERE id = $2',
+                    [item.quantity || 1, item.id]
+                );
+            }
+        } catch (stockErr) {
+            console.error("Failed to update stock quantity:", stockErr);
+        }
+
         // Auto-Send Notification
         try {
             const notifTitle = "Order Placed Successfully";
@@ -484,11 +496,11 @@ app.get('/api/products', async (req, res) => {
 
 app.post('/api/products', async (req, res) => {
     // Admin Only TODO: Middleware
-    const { name, price, description, sizes, colors, image_urls, is_available, category } = req.body;
+    const { name, price, description, sizes, colors, image_urls, is_available, category, stock_quantity } = req.body;
     try {
         const result = await db.query(
-            'INSERT INTO products (name, price, description, sizes, colors, image_urls, is_available, category) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-            [name, price, description, JSON.stringify(sizes), JSON.stringify(colors), JSON.stringify(image_urls), is_available, category]
+            'INSERT INTO products (name, price, description, sizes, colors, image_urls, is_available, category, stock_quantity) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+            [name, price, description, JSON.stringify(sizes), JSON.stringify(colors), JSON.stringify(image_urls), is_available, category, stock_quantity]
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
@@ -498,11 +510,11 @@ app.post('/api/products', async (req, res) => {
 
 app.put('/api/products/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, price, description, sizes, colors, image_urls, is_available, category } = req.body;
+    const { name, price, description, sizes, colors, image_urls, is_available, category, stock_quantity } = req.body;
     try {
         const result = await db.query(
-            'UPDATE products SET name = $1, price = $2, description = $3, sizes = $4, colors = $5, image_urls = $6, is_available = $7, category = $8 WHERE id = $9 RETURNING *',
-            [name, price, description, JSON.stringify(sizes), JSON.stringify(colors), JSON.stringify(image_urls), is_available, category, id]
+            'UPDATE products SET name = $1, price = $2, description = $3, sizes = $4, colors = $5, image_urls = $6, is_available = $7, category = $8, stock_quantity = $9 WHERE id = $10 RETURNING *',
+            [name, price, description, JSON.stringify(sizes), JSON.stringify(colors), JSON.stringify(image_urls), is_available, category, stock_quantity, id]
         );
         if (result.rows.length === 0) return res.status(404).json({ error: 'Product not found' });
         res.json(result.rows[0]);

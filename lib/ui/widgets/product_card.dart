@@ -57,6 +57,25 @@ class ProductCard extends StatelessWidget {
                             child: const Icon(Icons.image),
                           ),
                   ),
+                  // Sold Out Overlay
+                  if (product.isSoldOut)
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'SOLD OUT',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
                   // Wishlist Button - Top Right
                   Positioned(
                     top: 8,

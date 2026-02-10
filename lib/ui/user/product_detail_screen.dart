@@ -640,48 +640,76 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   top: Radius.circular(24),
                 ),
               ),
-              child: Row(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade200),
-                      borderRadius: BorderRadius.circular(12),
+                  if (widget.product.stockQuantity < 5 &&
+                      widget.product.stockQuantity > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Text(
+                        'Only ${widget.product.stockQuantity} left in stock!',
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                    child: IconButton(
-                      icon: const Icon(Icons.add_shopping_cart),
-                      onPressed: () => _addToCart(false),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => _addToCart(true),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryUser,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
+                  Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade200),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        elevation: 8,
-                        shadowColor: AppColors.primaryUser.withValues(
-                          alpha: 0.4,
+                        child: IconButton(
+                          icon: const Icon(Icons.add_shopping_cart),
+                          onPressed: widget.product.isSoldOut
+                              ? null
+                              : () => _addToCart(false),
                         ),
                       ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Buy Now',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: widget.product.isSoldOut
+                              ? null
+                              : () => _addToCart(true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: widget.product.isSoldOut
+                                ? Colors.grey
+                                : AppColors.primaryUser,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: widget.product.isSoldOut ? 0 : 8,
+                            shadowColor: AppColors.primaryUser.withValues(
+                              alpha: 0.4,
                             ),
                           ),
-                          SizedBox(width: 8),
-                          Icon(Icons.arrow_forward, size: 20),
-                        ],
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                widget.product.isSoldOut
+                                    ? 'SOLD OUT'
+                                    : 'Buy Now',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (!widget.product.isSoldOut) ...[
+                                const SizedBox(width: 8),
+                                const Icon(Icons.arrow_forward, size: 20),
+                              ],
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),

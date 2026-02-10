@@ -21,6 +21,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   late TextEditingController _discountCtrl;
   late TextEditingController _descCtrl;
   late TextEditingController _categoryCtrl;
+  late TextEditingController _stockCtrl;
   List<String> _imageUrls = [];
   bool _isAvailable = true;
   bool _isLoading = false;
@@ -40,6 +41,9 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
     );
     _descCtrl = TextEditingController(text: widget.product?.description ?? '');
     _categoryCtrl = TextEditingController(text: widget.product?.category ?? '');
+    _stockCtrl = TextEditingController(
+      text: widget.product?.stockQuantity.toString() ?? '1',
+    );
     _imageUrls = widget.product?.images ?? [];
 
     if (widget.product != null) {
@@ -137,6 +141,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
       category: _categoryCtrl.text.trim().isEmpty
           ? 'General'
           : _categoryCtrl.text.trim(),
+      stockQuantity: int.tryParse(_stockCtrl.text) ?? 1,
       isAvailable: _isAvailable,
     );
 
@@ -435,16 +440,23 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
 
                   const SizedBox(height: 16),
 
+                  // Stock Quantity
+                  _buildInputLabel('Stock Quantity'),
+                  _buildPremiumInput(_stockCtrl, 'e.g. 10', isNumber: true),
+
+                  const SizedBox(height: 16),
+
                   // Availability
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
                     title: const Text(
-                      'Available in Stock',
+                      'Searchable in App',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    subtitle: const Text('Hide product without deleting it'),
                     value: _isAvailable,
                     activeTrackColor: AppColors.primaryUser,
                     onChanged: (v) => setState(() => _isAvailable = v),
