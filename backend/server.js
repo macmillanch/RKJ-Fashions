@@ -272,6 +272,34 @@ app.put('/api/users/:id', async (req, res) => {
     }
 });
 
+// Update User Role
+app.put('/api/users/:id/role', async (req, res) => {
+    const { id } = req.params;
+    const { role } = req.body; // 'admin' or 'user'
+    try {
+        const result = await db.query(
+            'UPDATE users SET role = $1 WHERE id = $2 RETURNING *',
+            [role, id]
+        );
+        if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+        res.json({ message: `User role updated to ${role}` });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete User
+app.delete('/api/users/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const result = await db.query('DELETE FROM users WHERE id = $1 RETURNING *', [id]);
+        if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
+        res.json({ message: 'User deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 
 // --- ORDER ROUTES ---

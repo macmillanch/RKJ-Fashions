@@ -346,5 +346,21 @@ class DatabaseService {
     if (response.statusCode != 200) {
       throw Exception('Failed to update settings');
     }
+  Future<void> updateUserRole(String userId, String role) async {
+    final response = await http.put(
+      Uri.parse('$_baseUrl/users/$userId/role'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'role': role}),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Failed to update user role');
+    }
+  }
+
+  Future<void> deleteUser(String userId) async {
+    final response = await http.delete(Uri.parse('$_baseUrl/users/$userId'));
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete user');
+    }
   }
 }
