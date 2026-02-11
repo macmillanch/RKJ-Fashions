@@ -5,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/app_config.dart';
 
 class UpdateService {
-  static const String currentVersion = "1.1.8";
+  static const String currentVersion = "1.1.9";
 
   static Future<void> checkForUpdates(BuildContext context) async {
     try {

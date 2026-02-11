@@ -16,10 +16,10 @@ app.get('/', (req, res) => {
 
 app.get('/api/app-version', (req, res) => {
     res.json({
-        version: "1.1.8",
-        url: "https://rkj-fashions.onrender.com/downloads/rkj-fashions-v1.1.8.apk",
+        version: "1.1.9",
+        url: "https://rkj-fashions.onrender.com/downloads/rkj-fashions-v1.1.9.apk",
         forceUpdate: true,
-        releaseNotes: "RKJ Fashions v1.1.8: General improvements and latest build updates."
+        releaseNotes: "RKJ Fashions v1.1.9: Final production build with guest browsing, splash screen improvements, and address management."
     });
 });
 
