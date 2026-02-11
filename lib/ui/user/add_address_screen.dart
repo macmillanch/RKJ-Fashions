@@ -25,6 +25,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   String? _selectedState;
   bool _isDefault = false;
   bool _isLoadingPincode = false;
+  String _selectedType = 'Home'; // Home, Office, Others
 
   final List<String> _states = [
     'Andhra Pradesh',
@@ -79,6 +80,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
       _cityController.text = addr['city'] ?? '';
       _selectedState = addr['state'];
       _isDefault = addr['is_default'] ?? false;
+      _selectedType = addr['address_type'] ?? addr['type'] ?? 'Home';
 
       // Parsing street address back into parts is tricky as it's stored as one string.
       // We will put the full street into address1 and let the user edit it.
@@ -197,6 +199,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         'city': _cityController.text,
         'state': _selectedState,
         'isDefault': _isDefault,
+        'type': _selectedType,
       };
 
       if (widget.existingAddress != null) {
@@ -325,6 +328,25 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
                   ),
                   const SizedBox(height: 20),
                   _buildDropdown(),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'Address Type',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: AppColors.textUser,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _buildTypeChip('Home', Icons.home),
+                      const SizedBox(width: 12),
+                      _buildTypeChip('Office', Icons.work),
+                      const SizedBox(width: 12),
+                      _buildTypeChip('Others', Icons.location_on),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -512,6 +534,50 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildTypeChip(String type, IconData icon) {
+    bool isSelected = _selectedType == type;
+    return GestureDetector(
+      onTap: () => setState(() => _selectedType = type),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primaryUser : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.primaryUser : Colors.grey.shade300,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primaryUser.withValues(alpha: 0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isSelected ? Colors.white : AppColors.textMuted,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              type,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                color: isSelected ? Colors.white : AppColors.textUser,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../widgets/login_required_view.dart';
 import '../../data/models/order_model.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/services/database_service.dart';
@@ -39,10 +40,15 @@ class _MyOrdersScreenState extends State<MyOrdersScreen>
 
   @override
   Widget build(BuildContext context) {
-    final userId = context.read<AuthService>().currentUser?.id;
+    final userId = context.watch<AuthService>().currentUser?.id;
     if (userId == null) {
       return const Scaffold(
-        body: Center(child: Text('Please login to view orders.')),
+        body: LoginRequiredView(
+          title: 'Your Orders',
+          message:
+              'Sign in to track your orders and view your purchase history.',
+          icon: Icons.local_shipping_outlined,
+        ),
       );
     }
 

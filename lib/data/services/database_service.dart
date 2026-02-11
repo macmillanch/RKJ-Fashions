@@ -4,11 +4,26 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../models/product_model.dart';
 import '../models/order_model.dart';
-
+import '../models/user_model.dart';
 import '../../core/app_config.dart';
 
 class DatabaseService {
   String get _baseUrl => AppConfig.baseUrl;
+
+  // Users
+  Future<List<User>> getUsers() async {
+    try {
+      final response = await http.get(Uri.parse('$_baseUrl/debug/users'));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data.map((json) => User.fromJson(json)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Error fetching users: $e');
+      return [];
+    }
+  }
 
   // Products
   Stream<List<Product>> getProducts() async* {
@@ -143,7 +158,7 @@ class DatabaseService {
     try {
       final response = await http.get(
         Uri.parse(
-          'https://speedpost-tracking-api-for-india-post.p.rapidapi.com/speedpost/track/$consignmentNumber',
+          'https://speedpost-tracking-api-for-india-post.p.prapidapi.com/speedpost/track/$consignmentNumber',
         ),
         headers: {
           'x-rapidapi-host':

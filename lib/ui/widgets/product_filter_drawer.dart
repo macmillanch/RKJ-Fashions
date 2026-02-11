@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_colors.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class ProductFilterDrawer extends StatefulWidget {
   const ProductFilterDrawer({super.key});
@@ -10,17 +11,14 @@ class ProductFilterDrawer extends StatefulWidget {
 
 class _ProductFilterDrawerState extends State<ProductFilterDrawer> {
   RangeValues _currentPriceRange = const RangeValues(50, 250);
-  String _selectedSize = 'M';
-  String _selectedColor = 'Sage';
+  final TextEditingController _minPriceCtrl = TextEditingController(text: '50');
+  final TextEditingController _maxPriceCtrl = TextEditingController(
+    text: '250',
+  );
+  String _selectedSize = 'Adult';
+  final List<Color> _selectedColors = [];
 
-  final List<String> _sizes = ['S', 'M', 'L', 'XL', 'XXL'];
-  final List<Map<String, dynamic>> _colors = [
-    {'name': 'Rose', 'color': const Color(0xFFE8C4C4)},
-    {'name': 'Sage', 'color': const Color(0xFFBCC5B5)},
-    {'name': 'Cream', 'color': const Color(0xFFF5F0E6)},
-    {'name': 'Sky', 'color': const Color(0xFFC8D9EB)},
-    {'name': 'Noir', 'color': const Color(0xFF2A2A2A)},
-  ];
+  final List<String> _sizes = ['Kids', 'Adult', 'S', 'M', 'L', 'XL'];
 
   @override
   Widget build(BuildContext context) {
@@ -74,24 +72,42 @@ class _ProductFilterDrawerState extends State<ProductFilterDrawer> {
                 children: [
                   // Price Range
                   const SizedBox(height: 10),
+                  const Text(
+                    'Price Range',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textUser,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Price Range',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textUser,
-                        ),
+                      Expanded(
+                        child: _buildPriceInput(_minPriceCtrl, 'Min', (val) {
+                          setState(() {
+                            double min = double.tryParse(val) ?? 0;
+                            _currentPriceRange = RangeValues(
+                              min,
+                              _currentPriceRange.end,
+                            );
+                          });
+                        }),
                       ),
-                      Text(
-                        '₹${_currentPriceRange.start.round()} - ₹${_currentPriceRange.end.round()}',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primaryUser,
-                        ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: Text('-', style: TextStyle(fontSize: 20)),
+                      ),
+                      Expanded(
+                        child: _buildPriceInput(_maxPriceCtrl, 'Max', (val) {
+                          setState(() {
+                            double max = double.tryParse(val) ?? 500;
+                            _currentPriceRange = RangeValues(
+                              _currentPriceRange.start,
+                              max,
+                            );
+                          });
+                        }),
                       ),
                     ],
                   ),
@@ -99,36 +115,17 @@ class _ProductFilterDrawerState extends State<ProductFilterDrawer> {
                   RangeSlider(
                     values: _currentPriceRange,
                     min: 0,
-                    max: 500,
+                    max: 1000,
+                    divisions: 100,
                     activeColor: AppColors.primaryUser,
                     inactiveColor: Colors.grey[200],
                     onChanged: (RangeValues values) {
                       setState(() {
                         _currentPriceRange = values;
+                        _minPriceCtrl.text = values.start.round().toString();
+                        _maxPriceCtrl.text = values.end.round().toString();
                       });
                     },
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '₹0',
-                          style: TextStyle(
-                            color: AppColors.textMuted,
-                            fontSize: 12,
-                          ),
-                        ),
-                        Text(
-                          '₹500+',
-                          style: TextStyle(
-                            color: AppColors.textMuted,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
 
                   const SizedBox(height: 32),
@@ -156,14 +153,15 @@ class _ProductFilterDrawerState extends State<ProductFilterDrawer> {
                             ? null
                             : () => setState(() => _selectedSize = size),
                         child: Container(
-                          width: 50,
-                          height: 50,
-                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
                           decoration: BoxDecoration(
                             color: isSelected
                                 ? AppColors.primaryUser
                                 : Colors.white,
-                            shape: BoxShape.circle,
+                            borderRadius: BorderRadius.circular(15),
                             border: Border.all(
                               color: isSelected
                                   ? AppColors.primaryUser
@@ -205,67 +203,94 @@ class _ProductFilterDrawerState extends State<ProductFilterDrawer> {
                   const SizedBox(height: 32),
 
                   // Color Selection
-                  const Text(
-                    'Colors',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textUser,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Colors (Select up to 5)',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textUser,
+                        ),
+                      ),
+                      Text(
+                        '${_selectedColors.length}/5',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: _selectedColors.length >= 5
+                              ? Colors.red
+                              : AppColors.textMuted,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
                   Wrap(
-                    spacing: 20,
-                    runSpacing: 16,
-                    children: _colors.map((colorMap) {
-                      final isSelected = _selectedColor == colorMap['name'];
-                      return Column(
-                        children: [
-                          GestureDetector(
-                            onTap: () => setState(
-                              () => _selectedColor = colorMap['name'],
-                            ),
-                            child: Container(
-                              width: 45,
-                              height: 45,
+                    spacing: 12,
+                    runSpacing: 12,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      ..._selectedColors.map(
+                        (color) => Stack(
+                          children: [
+                            Container(
+                              width: 50,
+                              height: 50,
                               decoration: BoxDecoration(
-                                color: colorMap['color'],
+                                color: color,
                                 shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey.shade300),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withValues(alpha: 0.1),
                                     blurRadius: 4,
-                                    offset: const Offset(0, 2),
                                   ),
                                 ],
-                                border: isSelected
-                                    ? Border.all(color: Colors.white, width: 2)
-                                    : null,
                               ),
-                              child: isSelected
-                                  ? const Icon(
-                                      Icons.check,
-                                      color: Colors.white,
-                                      size: 20,
-                                    )
-                                  : null,
+                            ),
+                            Positioned(
+                              right: -2,
+                              top: -2,
+                              child: GestureDetector(
+                                onTap: () => setState(
+                                  () => _selectedColors.remove(color),
+                                ),
+                                child: const CircleAvatar(
+                                  radius: 10,
+                                  backgroundColor: Colors.red,
+                                  child: Icon(
+                                    Icons.close,
+                                    size: 12,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (_selectedColors.length < 5)
+                        GestureDetector(
+                          onTap: _showColorPicker,
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.grey[300]!,
+                                style: BorderStyle.solid,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.add,
+                              color: AppColors.primaryUser,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            colorMap['name'],
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: isSelected
-                                  ? AppColors.textUser
-                                  : AppColors.textMuted,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      );
-                    }).toList(),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 40),
                 ],
@@ -286,9 +311,11 @@ class _ProductFilterDrawerState extends State<ProductFilterDrawer> {
                   onPressed: () {
                     // Reset Logic
                     setState(() {
-                      _currentPriceRange = const RangeValues(0, 500);
-                      _selectedSize = 'M';
-                      _selectedColor = 'Sage';
+                      _currentPriceRange = const RangeValues(0, 1000);
+                      _minPriceCtrl.text = '0';
+                      _maxPriceCtrl.text = '1000';
+                      _selectedSize = 'Adult';
+                      _selectedColors.clear();
                     });
                   },
                   child: const Text(
@@ -343,6 +370,50 @@ class _ProductFilterDrawerState extends State<ProductFilterDrawer> {
                 ),
               ],
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPriceInput(
+    TextEditingController ctrl,
+    String label,
+    Function(String) onChanged,
+  ) {
+    return TextField(
+      controller: ctrl,
+      keyboardType: TextInputType.number,
+      onChanged: onChanged,
+      style: const TextStyle(fontWeight: FontWeight.bold),
+      decoration: InputDecoration(
+        labelText: label,
+        prefixText: '₹ ',
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+    );
+  }
+
+  void _showColorPicker() {
+    Color pickerColor = AppColors.primaryUser;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Pick a color'),
+        content: SingleChildScrollView(
+          child: ColorPicker(
+            pickerColor: pickerColor,
+            onColorChanged: (color) => pickerColor = color,
+          ),
+        ),
+        actions: [
+          ElevatedButton(
+            child: const Text('Got it'),
+            onPressed: () {
+              setState(() => _selectedColors.add(pickerColor));
+              Navigator.of(context).pop();
+            },
           ),
         ],
       ),

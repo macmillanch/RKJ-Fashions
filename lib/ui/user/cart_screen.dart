@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/providers/cart_provider.dart';
+import '../../data/services/auth_service.dart';
+import '../auth/login_screen.dart';
 import 'payment_screen.dart';
 
 class CartScreen extends StatelessWidget {
@@ -263,6 +265,16 @@ class CartScreen extends StatelessWidget {
                       const SizedBox(height: 24),
                       ElevatedButton(
                         onPressed: () {
+                          final user = context.read<AuthService>().currentUser;
+                          if (user == null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const LoginScreen(),
+                              ),
+                            );
+                            return;
+                          }
                           Navigator.push(
                             context,
                             MaterialPageRoute(

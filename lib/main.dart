@@ -6,7 +6,6 @@ import 'data/providers/cart_provider.dart';
 import 'data/providers/wishlist_provider.dart';
 import 'core/theme/user_theme.dart';
 import 'core/theme/admin_theme.dart';
-import 'ui/auth/login_screen.dart';
 import 'ui/admin/admin_home_screen.dart';
 import 'ui/user/user_home_screen.dart';
 import 'data/services/update_service.dart';
@@ -101,6 +100,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       return const UserHomeScreen();
     }
 
-    return const LoginScreen();
+    // Default to UserHomeScreen for guests
+    return const UserHomeScreen();
   }
 }

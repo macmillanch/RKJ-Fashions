@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
@@ -27,7 +29,7 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
   bool _isLoading = false;
 
   final TextEditingController _sizesCtrl = TextEditingController();
-  final TextEditingController _colorsCtrl = TextEditingController();
+  List<Color> _selectedColors = [];
 
   @override
   void initState() {
@@ -48,7 +50,19 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
 
     if (widget.product != null) {
       _sizesCtrl.text = widget.product!.sizes.join(', ');
-      _colorsCtrl.text = widget.product!.colors.join(', ');
+      _selectedColors = widget.product!.colors
+          .map((c) {
+            try {
+              if (c.startsWith('#')) {
+                return Color(int.parse(c.replaceFirst('#', '0xFF')));
+              }
+              return Colors.transparent; // Fallback for names
+            } catch (_) {
+              return Colors.transparent;
+            }
+          })
+          .where((c) => c != Colors.transparent)
+          .toList();
       _isAvailable = widget.product!.isAvailable;
     }
   }
@@ -131,10 +145,11 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
           .map((e) => e.trim())
           .where((e) => e.isNotEmpty)
           .toList(),
-      colors: _colorsCtrl.text
-          .split(',')
-          .map((e) => e.trim())
-          .where((e) => e.isNotEmpty)
+      colors: _selectedColors
+          .map(
+            (c) =>
+                '#${c.toARGB32().toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}',
+          )
           .toList(),
       images: _imageUrls,
       description: _descCtrl.text.trim(),
@@ -412,12 +427,15 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                   // Sizes
                   _buildInputLabel('Available Sizes'),
 
-                  // Presets
-                  Row(
+                  Wrap(
+                    spacing: 8,
                     children: [
                       _buildSizePresetChip('Kids'),
-                      const SizedBox(width: 10),
-                      _buildSizePresetChip('Adults'),
+                      _buildSizePresetChip('Adult'),
+                      _buildSizePresetChip('S'),
+                      _buildSizePresetChip('M'),
+                      _buildSizePresetChip('L'),
+                      _buildSizePresetChip('XL'),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -429,8 +447,77 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
                   const SizedBox(height: 16),
 
                   // Colors
-                  _buildInputLabel('Colors'),
-                  _buildPremiumInput(_colorsCtrl, 'Red, Blue, Green'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildInputLabel('Colors (Max 5)'),
+                      Text(
+                        '${_selectedColors.length}/5',
+                        style: TextStyle(
+                          color: _selectedColors.length >= 5
+                              ? Colors.red
+                              : Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: [
+                      ..._selectedColors.map(
+                        (color) => Stack(
+                          children: [
+                            Container(
+                              width: 45,
+                              height: 45,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                            ),
+                            Positioned(
+                              right: -2,
+                              top: -2,
+                              child: GestureDetector(
+                                onTap: () => setState(
+                                  () => _selectedColors.remove(color),
+                                ),
+                                child: const CircleAvatar(
+                                  radius: 10,
+                                  backgroundColor: Colors.red,
+                                  child: Icon(
+                                    Icons.close,
+                                    size: 12,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (_selectedColors.length < 5)
+                        GestureDetector(
+                          onTap: _showColorPicker,
+                          child: Container(
+                            width: 45,
+                            height: 45,
+                            decoration: BoxDecoration(
+                              color: Colors.grey[100],
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.grey[300]!),
+                            ),
+                            child: const Icon(
+                              Icons.add,
+                              color: AppColors.primaryUser,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
 
                   const SizedBox(height: 16),
 
@@ -607,6 +694,31 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
           ),
         ),
         validator: (v) => v!.isEmpty ? 'Required' : null,
+      ),
+    );
+  }
+
+  void _showColorPicker() {
+    Color pickerColor = AppColors.primaryUser;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Pick a color'),
+        content: SingleChildScrollView(
+          child: ColorPicker(
+            pickerColor: pickerColor,
+            onColorChanged: (color) => pickerColor = color,
+          ),
+        ),
+        actions: [
+          ElevatedButton(
+            child: const Text('Add'),
+            onPressed: () {
+              setState(() => _selectedColors.add(pickerColor));
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
       ),
     );
   }

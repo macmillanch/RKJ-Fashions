@@ -18,16 +18,24 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     if (kIsWeb) {
-      _navigateToHome();
+      // On web, show logo for a short duration instead of video
+      Future.delayed(const Duration(seconds: 2), () {
+        _navigateToHome();
+      });
       return;
     }
     _controller = VideoPlayerController.asset('assets/videos/splash.mp4')
-      ..initialize().then((_) {
-        setState(() {
-          _initialized = true;
-        });
-        _controller.play();
-      });
+      ..initialize()
+          .then((_) {
+            setState(() {
+              _initialized = true;
+            });
+            _controller.play();
+          })
+          .catchError((e) {
+            debugPrint('Video error: $e');
+            _navigateToHome();
+          });
 
     _controller.addListener(_checkVideo);
   }
@@ -41,27 +49,23 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _navigateToHome() {
-    // Small delay to ensure smooth transition
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (mounted) {
-        Navigator.of(context).pushReplacement(
-          PageRouteBuilder(
-            pageBuilder: (context, animation, secondaryAnimation) =>
-                const AuthWrapper(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
-                  return FadeTransition(opacity: animation, child: child);
-                },
-            transitionDuration: const Duration(milliseconds: 500),
-          ),
-        );
-      }
-    });
+    if (mounted) {
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const AuthWrapper(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          transitionDuration: const Duration(milliseconds: 500),
+        ),
+      );
+    }
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (!kIsWeb) _controller.dispose();
     super.dispose();
   }
 
@@ -70,12 +74,21 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
-        child: _initialized
-            ? AspectRatio(
+        child: kIsWeb || !_initialized
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset('assets/images/logo.png', width: 200),
+                  const SizedBox(height: 20),
+                  const CircularProgressIndicator(
+                    color: Color(0xFFD912BB), // Primary color
+                  ),
+                ],
+              )
+            : AspectRatio(
                 aspectRatio: _controller.value.aspectRatio,
                 child: VideoPlayer(_controller),
-              )
-            : const SizedBox(),
+              ),
       ),
     );
   }

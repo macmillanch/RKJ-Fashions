@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_colors.dart';
+import 'map_screen.dart';
 import '../../data/services/database_service.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -209,10 +210,10 @@ class _ContactScreenState extends State<ContactScreen> {
   }
 
   Future<void> _openMap() async {
-    // Precise coordinates from user's latest request
-    const url =
-        'https://www.google.com/maps/search/?api=1&query=22.6104869,92.6409908';
-    await _launchUrl(url);
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const MapScreen()),
+    );
   }
 
   @override

@@ -23,6 +23,7 @@ const initDb = async () => {
             await pool.query(schema);
             // Patch existing table if needed
             await pool.query('ALTER TABLE users ALTER COLUMN phone DROP NOT NULL').catch(() => { });
+            await pool.query('ALTER TABLE addresses ADD COLUMN IF NOT EXISTS address_type VARCHAR(20) DEFAULT \'Home\'').catch(() => { });
             console.log('Database initialized successfully');
         }
     } catch (err) {

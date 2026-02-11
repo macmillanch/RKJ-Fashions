@@ -6,6 +6,8 @@ import '../../core/theme/app_colors.dart';
 import '../../data/models/product_model.dart';
 import '../../data/providers/cart_provider.dart';
 import '../../data/providers/wishlist_provider.dart';
+import '../../data/services/auth_service.dart';
+import '../auth/login_screen.dart';
 import 'cart_screen.dart';
 import 'product_review_screen.dart'; // New Import
 
@@ -57,6 +59,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
 
     if (buyNow) {
+      final user = context.read<AuthService>().currentUser;
+      if (user == null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+        return;
+      }
       Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const CartScreen()),
@@ -571,7 +581,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           return _buildGlassButton(
                             context,
                             isLiked ? Icons.favorite : Icons.favorite_border,
-                            () => wishlist.toggleWishlist(widget.product),
+                            () {
+                              final user = context
+                                  .read<AuthService>()
+                                  .currentUser;
+                              if (user == null) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const LoginScreen(),
+                                  ),
+                                );
+                                return;
+                              }
+                              wishlist.toggleWishlist(widget.product);
+                            },
                             color: isLiked ? Colors.red : Colors.white,
                           );
                         },

@@ -158,9 +158,8 @@ class _UserHomeScreenState extends State<UserHomeScreen> {
         ],
       ),
       body: Column(
-        // Changed body to Column to include _buildHeader
         children: [
-          _buildHeader(context), // Added the new header
+          if (_currentIndex == 0) _buildHeader(context),
           Expanded(child: _pages[_currentIndex]),
         ],
       ),

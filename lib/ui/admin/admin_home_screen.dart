@@ -6,6 +6,7 @@ import 'add_edit_product_screen.dart';
 import 'manage_orders_screen.dart';
 import 'product_list_screen.dart';
 import 'admin_shop_settings_screen.dart';
+import 'manage_members_screen.dart';
 
 import '../user/user_profile_screen.dart';
 import '../../main.dart';
@@ -111,6 +112,17 @@ class AdminHomeScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (_) => const AdminShopSettingsScreen(),
+                    ),
+                  ),
+                ),
+                _AdminTile(
+                  title: 'Registered Members',
+                  icon: Icons.people_alt_outlined,
+                  color: Colors.indigo,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const ManageMembersScreen(),
                     ),
                   ),
                 ),

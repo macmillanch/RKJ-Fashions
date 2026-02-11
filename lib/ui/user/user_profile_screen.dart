@@ -14,6 +14,7 @@ import 'static_screens.dart';
 import 'personal_details_screen.dart';
 import 'my_addresses_screen.dart';
 import 'wishlist_screen.dart';
+import '../widgets/login_required_view.dart';
 import '../../main.dart';
 
 class UserProfileScreen extends StatefulWidget {
@@ -25,7 +26,6 @@ class UserProfileScreen extends StatefulWidget {
 }
 
 class _UserProfileScreenState extends State<UserProfileScreen> {
-  // We'll manage upload state locally if needed, but for now we just wait async
   bool _isUploading = false;
 
   Future<void> _pickAndUploadImage(User user) async {
@@ -62,9 +62,21 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Watch Auth Service for user changes
     final authService = context.watch<AuthService>();
     final user = authService.currentUser;
+
+    if (user == null) {
+      return Scaffold(
+        backgroundColor: AppColors.backgroundUser,
+        appBar: widget.showAppBar ? AppBar(title: const Text('Profile')) : null,
+        body: const LoginRequiredView(
+          title: 'Your Profile',
+          message:
+              'Sign in to view your orders, addresses, and manage your account.',
+          icon: Icons.person_outline,
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.backgroundUser,
@@ -85,14 +97,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         child: Column(
           children: [
             const SizedBox(height: 50),
-            // Profile Header
             Center(
               child: Column(
                 children: [
                   GestureDetector(
-                    onTap: user == null
-                        ? null
-                        : () => _pickAndUploadImage(user),
+                    onTap: () => _pickAndUploadImage(user),
                     child: Stack(
                       children: [
                         Container(
@@ -105,16 +114,16 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                               color: AppColors.primaryUser,
                               width: 2,
                             ),
-                            image: user?.profileImageUrl != null
+                            image: user.profileImageUrl != null
                                 ? DecorationImage(
-                                    image: NetworkImage(user!.profileImageUrl!),
+                                    image: NetworkImage(user.profileImageUrl!),
                                     fit: BoxFit.cover,
                                   )
                                 : null,
                           ),
                           child: _isUploading
                               ? const CircularProgressIndicator()
-                              : (user?.profileImageUrl == null
+                              : (user.profileImageUrl == null
                                     ? const Icon(
                                         Icons.person,
                                         size: 50,
@@ -122,7 +131,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                                       )
                                     : null),
                         ),
-                        if (user != null && !_isUploading)
+                        if (!_isUploading)
                           Positioned(
                             bottom: 0,
                             right: 0,
@@ -144,7 +153,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    user?.name ?? 'Guest User',
+                    user.name ?? 'RKJ User',
                     style: const TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -152,35 +161,33 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     ),
                   ),
                   Text(
-                    user?.email ?? user?.phone ?? 'Sign in to sync your data',
+                    user.email ?? user.phone,
                     style: const TextStyle(
                       color: AppColors.textMuted,
                       fontSize: 14,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  if (user != null)
-                    GestureDetector(
-                      onTap: () {
-                        Clipboard.setData(ClipboardData(text: user.id));
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('User ID Copied!')),
-                        );
-                      },
-                      child: Text(
-                        'ID: ${user.displayId} (Tap to copy)',
-                        style: const TextStyle(
-                          color: AppColors.textMuted,
-                          fontSize: 10,
-                        ),
+                  GestureDetector(
+                    onTap: () {
+                      Clipboard.setData(ClipboardData(text: user.id));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('User ID Copied!')),
+                      );
+                    },
+                    child: Text(
+                      'ID: ${user.displayId} (Tap to copy)',
+                      style: const TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 10,
                       ),
                     ),
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 40),
 
-            // Menu Items
             _buildSection(context, 'Account', [
               _buildMenuItem(
                 context,
@@ -229,19 +236,20 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 context,
                 Icons.local_shipping_outlined,
                 'My Orders',
-                () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const MyOrdersScreen()),
-                  );
-                },
+                () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MyOrdersScreen()),
+                ),
               ),
-              _buildMenuItem(context, Icons.favorite_border, 'Wishlist', () {
-                Navigator.push(
+              _buildMenuItem(
+                context,
+                Icons.favorite_border,
+                'Wishlist',
+                () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const WishlistScreen()),
-                );
-              }),
+                ),
+              ),
               _buildMenuItem(
                 context,
                 Icons.local_offer_outlined,
@@ -253,7 +261,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               ),
             ]),
 
-            _buildSection(context, 'Support & Information', [
+            _buildSection(context, 'Support', [
               _buildMenuItem(
                 context,
                 Icons.info_outline,
@@ -272,16 +280,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                   MaterialPageRoute(builder: (_) => const ContactScreen()),
                 ),
               ),
-              _buildMenuItem(
-                context,
-                Icons.help_outline,
-                'Help & Support',
-                () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HelpScreen()),
-                ),
-              ),
-
               _buildMenuItem(context, Icons.logout, 'Log Out', () async {
                 await context.read<AuthService>().signOut();
                 if (context.mounted) {

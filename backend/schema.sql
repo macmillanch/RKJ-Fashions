@@ -71,6 +71,7 @@ CREATE TABLE IF NOT EXISTS addresses (
     state VARCHAR(100),
     zip VARCHAR(20),
     is_default BOOLEAN DEFAULT FALSE,
+    address_type VARCHAR(20) DEFAULT 'Home', -- Home, Office, Others
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

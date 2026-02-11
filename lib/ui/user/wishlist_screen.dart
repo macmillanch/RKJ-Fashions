@@ -5,6 +5,7 @@ import '../../data/models/product_model.dart';
 import '../../data/services/auth_service.dart';
 import '../../data/services/database_service.dart';
 import 'product_detail_screen.dart';
+import '../widgets/login_required_view.dart';
 
 class WishlistScreen extends StatelessWidget {
   const WishlistScreen({super.key});
@@ -16,7 +17,11 @@ class WishlistScreen extends StatelessWidget {
 
     if (user == null) {
       return const Scaffold(
-        body: Center(child: Text('Please login to view wishlist')),
+        body: LoginRequiredView(
+          title: 'Your Wishlist',
+          message: 'Sign in to save your favorite items and view them later.',
+          icon: Icons.favorite_border,
+        ),
       );
     }
 

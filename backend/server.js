@@ -416,13 +416,14 @@ app.get('/api/addresses/:userId', async (req, res) => {
 
 app.post('/api/addresses', async (req, res) => {
     // EXTRACT AND MAP FRONTEND KEYS TO DB COLUMNS
-    const { userId, user_id, name, phone, address1, address2, landmark, street, city, state, zip, pincode, isDefault, is_default } = req.body;
+    const { userId, user_id, name, phone, address1, address2, landmark, street, city, state, zip, pincode, isDefault, is_default, address_type, type } = req.body;
 
     // Robust fallback logic
     const finalUserId = userId || user_id;
     const finalStreet = street || (address1 ? `${address1}${address2 ? ', ' + address2 : ''}${landmark ? ', ' + landmark : ''}` : '');
     const finalZip = zip || pincode;
     const finalIsDefault = (isDefault !== undefined) ? isDefault : ((is_default !== undefined) ? is_default : false);
+    const finalAddressType = address_type || type || 'Home';
 
     try {
         if (!finalUserId) throw new Error("User ID is required");
@@ -431,8 +432,8 @@ app.post('/api/addresses', async (req, res) => {
             await db.query('UPDATE addresses SET is_default = FALSE WHERE user_id = $1', [finalUserId]);
         }
         const result = await db.query(
-            'INSERT INTO addresses (user_id, name, phone, street, city, state, zip, is_default) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-            [finalUserId, name, phone, finalStreet, city, state, finalZip, finalIsDefault]
+            'INSERT INTO addresses (user_id, name, phone, street, city, state, zip, is_default, address_type) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+            [finalUserId, name, phone, finalStreet, city, state, finalZip, finalIsDefault, finalAddressType]
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
@@ -443,7 +444,7 @@ app.post('/api/addresses', async (req, res) => {
 
 app.put('/api/addresses/:userId/:addressId', async (req, res) => {
     const { userId, addressId } = req.params;
-    const { name, phone, address1, address2, landmark, street, city, state, zip, pincode, isDefault } = req.body;
+    const { name, phone, address1, address2, landmark, street, city, state, zip, pincode, isDefault, address_type, type } = req.body;
 
     // Fallback logic
     const finalStreet = street || (address1 ? `${address1}${address2 ? ', ' + address2 : ''}${landmark ? ', ' + landmark : ''}` : '');
@@ -462,9 +463,10 @@ app.put('/api/addresses/:userId/:addressId', async (req, res) => {
              city = COALESCE($4, city), 
              state = COALESCE($5, state), 
              zip = COALESCE($6, zip), 
-             is_default = COALESCE($7, is_default)
-             WHERE id = $8 AND user_id = $9 RETURNING *`,
-            [name, phone, finalStreet, city, state, finalZip, isDefault, addressId, userId]
+             is_default = COALESCE($7, is_default),
+             address_type = COALESCE($8, address_type)
+             WHERE id = $9 AND user_id = $10 RETURNING *`,
+            [name, phone, finalStreet, city, state, finalZip, isDefault, address_type || type, addressId, userId]
         );
 
         if (result.rows.length === 0) return res.status(404).json({ error: 'Address not found' });

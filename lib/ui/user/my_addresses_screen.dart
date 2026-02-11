@@ -90,8 +90,11 @@ class MyAddressesScreen extends StatelessWidget {
             separatorBuilder: (context, index) => const SizedBox(height: 16),
             itemBuilder: (context, index) {
               final addr = addresses[index];
+              final type = (addr['address_type'] ?? addr['type'] ?? 'Home')
+                  .toString()
+                  .toUpperCase();
               final addressString =
-                  '${addr['name'] ?? ''}\n${addr['address1']}, ${addr['address2']}\n${addr['city']} - ${addr['pincode']}\nPhone: ${addr['phone']}';
+                  '[$type] ${addr['name'] ?? ''}\n${addr['street'] ?? ''}\n${addr['city']} - ${addr['zip'] ?? addr['pincode'] ?? ''}\nPhone: ${addr['phone'] ?? ''}';
 
               return GestureDetector(
                 onTap: isSelectionMode
@@ -124,12 +127,41 @@ class MyAddressesScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              addr['name'] ?? 'No Name',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
+                            Row(
+                              children: [
+                                Text(
+                                  addr['name'] ?? 'No Name',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryUser.withValues(
+                                      alpha: 0.1,
+                                    ),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    (addr['address_type'] ??
+                                            addr['type'] ??
+                                            'Home')
+                                        .toString()
+                                        .toUpperCase(),
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primaryUser,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                             const SizedBox(height: 4),
                             Text(
