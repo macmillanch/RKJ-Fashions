@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:webview_flutter_web/webview_flutter_web.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/services/database_service.dart';
 
@@ -174,6 +176,9 @@ class _ContactScreenState extends State<ContactScreen> {
   @override
   void initState() {
     super.initState();
+    if (kIsWeb) {
+      WebViewPlatform.instance = WebWebViewPlatform();
+    }
     _loadSettings();
     _initMapController();
   }
