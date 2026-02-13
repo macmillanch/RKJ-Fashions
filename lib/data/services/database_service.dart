@@ -67,7 +67,14 @@ class DatabaseService {
       body: jsonEncode(product.toJson()),
     );
     if (response.statusCode != 200) {
-      throw Exception('Failed to update product');
+      String msg = 'Failed to update product';
+      try {
+        final errorData = jsonDecode(response.body);
+        msg = errorData['error'] ?? msg;
+      } catch (_) {
+        msg += ': ${response.statusCode}';
+      }
+      throw Exception(msg);
     }
   }
 

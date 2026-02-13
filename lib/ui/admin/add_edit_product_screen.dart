@@ -165,12 +165,12 @@ class _AddEditProductScreenState extends State<AddEditProductScreen> {
         await context
             .read<DatabaseService>()
             .addProduct(product)
-            .timeout(const Duration(seconds: 3));
+            .timeout(const Duration(seconds: 30));
       } else {
         await context
             .read<DatabaseService>()
             .updateProduct(product)
-            .timeout(const Duration(seconds: 3));
+            .timeout(const Duration(seconds: 30));
       }
       if (!mounted) return;
       Navigator.pop(context);

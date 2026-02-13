@@ -527,6 +527,7 @@ app.get('/api/products', async (req, res) => {
 app.post('/api/products', async (req, res) => {
     // Admin Only TODO: Middleware
     const { name, price, discount, description, sizes, colors, image_urls, is_available, category, stock_quantity } = req.body;
+    console.log('Adding product:', { name, price, discount });
     try {
         const result = await db.query(
             'INSERT INTO products (name, price, discount, description, sizes, colors, image_urls, is_available, category, stock_quantity) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
@@ -542,6 +543,7 @@ app.post('/api/products', async (req, res) => {
 app.put('/api/products/:id', async (req, res) => {
     const { id } = req.params;
     const { name, price, discount, description, sizes, colors, image_urls, is_available, category, stock_quantity } = req.body;
+    console.log('Updating product:', id, { name, price, discount });
     try {
         const result = await db.query(
             'UPDATE products SET name = $1, price = $2, discount = $3, description = $4, sizes = $5, colors = $6, image_urls = $7, is_available = $8, category = $9, stock_quantity = $10 WHERE id = $11 RETURNING *',

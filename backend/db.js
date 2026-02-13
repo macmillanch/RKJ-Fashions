@@ -24,6 +24,7 @@ const initDb = async () => {
             // Patch existing table if needed
             await pool.query('ALTER TABLE users ALTER COLUMN phone DROP NOT NULL').catch(() => { });
             await pool.query('ALTER TABLE addresses ADD COLUMN IF NOT EXISTS address_type VARCHAR(20) DEFAULT \'Home\'').catch(() => { });
+            await pool.query('ALTER TABLE products ALTER COLUMN discount TYPE DECIMAL(5,2)').catch(() => { });
             console.log('Database initialized successfully');
         }
     } catch (err) {
