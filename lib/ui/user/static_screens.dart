@@ -230,7 +230,7 @@ class _ContactScreenState extends State<ContactScreen> {
 
     final shopAddress =
         _settings['shop_address'] ??
-        'Near RCM School Kamalanagar V,\nMizoram 796770';
+        'Near RCM School Kamalanagar IV,\nChawngte, Mizoram Pin: 796772';
     final shopPhone = _settings['shop_phone'] ?? '+91 98765 43210';
     final shopEmail = _settings['shop_email'] ?? 'hello@krjfashions.com';
     final shopInsta = _settings['shop_instagram'] ?? '@rkj_fashions';
@@ -259,7 +259,84 @@ class _ContactScreenState extends State<ContactScreen> {
         child: Column(
           children: [
             const SizedBox(height: 16),
-            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: GestureDetector(
+                onTap: _launchDirections,
+                child: Container(
+                  width: double.infinity,
+                  height: 300,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.08),
+                        blurRadius: 40,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
+                    image: const DecorationImage(
+                      image: AssetImage('assets/images/shop_location.png'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: Stack(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(24),
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withValues(alpha: 0.1),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryUser,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 4,
+                                ),
+                                boxShadow: const [
+                                  BoxShadow(
+                                    color: Colors.black26,
+                                    blurRadius: 10,
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.storefront,
+                                color: Colors.white,
+                                size: 26,
+                              ),
+                            ),
+                            Transform.translate(
+                              offset: const Offset(0, -5),
+                              child: const Icon(
+                                Icons.arrow_drop_down,
+                                size: 40,
+                                color: AppColors.primaryUser,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
 
             Transform.translate(
               offset: const Offset(0, -24),
@@ -299,7 +376,7 @@ class _ContactScreenState extends State<ContactScreen> {
                       ),
                       const SizedBox(height: 4),
                       const Text(
-                        'EST. 2023',
+                        'EST. 2025',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
