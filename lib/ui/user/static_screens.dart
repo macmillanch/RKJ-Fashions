@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/services/database_service.dart';
 
@@ -168,11 +169,24 @@ class ContactScreen extends StatefulWidget {
 class _ContactScreenState extends State<ContactScreen> {
   Map<String, dynamic> _settings = {};
   bool _isLoading = true;
+  late final WebViewController _mapController;
 
   @override
   void initState() {
     super.initState();
     _loadSettings();
+    _initMapController();
+  }
+
+  void _initMapController() {
+    _mapController = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(const Color(0x00000000))
+      ..loadRequest(
+        Uri.parse(
+          'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d655.1533171118397!2d92.64088303728364!3d22.610323640008207!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x374d4d002e264f4b%3A0xad5aa0c3f0811bce!2sRKJ%20Fashions!5e1!3m2!1sen!2sin!4v1771004339665!5m2!1sen!2sin',
+        ),
+      );
   }
 
   Future<void> _loadSettings() async {
@@ -275,64 +289,70 @@ class _ContactScreenState extends State<ContactScreen> {
                         offset: const Offset(0, 10),
                       ),
                     ],
-                    image: const DecorationImage(
-                      image: AssetImage('assets/images/shop_location.png'),
-                      fit: BoxFit.cover,
-                    ),
                   ),
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              Colors.black.withValues(alpha: 0.1),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: Stack(
+                      children: [
+                        WebViewWidget(controller: _mapController),
+                        // Transparent overlay to catch taps for directions
+                        Positioned.fill(
+                          child: GestureDetector(
+                            onTap: _launchDirections,
+                            child: Container(color: Colors.transparent),
+                          ),
+                        ),
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withValues(alpha: 0.1),
+                              ],
+                            ),
+                          ),
+                        ),
+                        Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryUser,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 4,
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 10,
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.storefront,
+                                  color: Colors.white,
+                                  size: 26,
+                                ),
+                              ),
+                              Transform.translate(
+                                offset: const Offset(0, -5),
+                                child: const Icon(
+                                  Icons.arrow_drop_down,
+                                  size: 40,
+                                  color: AppColors.primaryUser,
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                      ),
-                      Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryUser,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 4,
-                                ),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 10,
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.storefront,
-                                color: Colors.white,
-                                size: 26,
-                              ),
-                            ),
-                            Transform.translate(
-                              offset: const Offset(0, -5),
-                              child: const Icon(
-                                Icons.arrow_drop_down,
-                                size: 40,
-                                color: AppColors.primaryUser,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
