@@ -209,8 +209,8 @@ class _ContactScreenState extends State<ContactScreen> {
   }
 
   Future<void> _launchDirections() async {
-    const String lat = "22.6104473";
-    const String lng = "92.6411212";
+    const String lat = "22.610486";
+    const String lng = "92.641209";
     final url = 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
     final uri = Uri.parse(url);
     try {
@@ -230,7 +230,7 @@ class _ContactScreenState extends State<ContactScreen> {
 
     final shopAddress =
         _settings['shop_address'] ??
-        'Near RCM School Kamalanagar IV,\nChawngte, Mizoram Pin: 796772';
+        'Near RCM School KamalanagarIV,\nChawngte , Mizoram Pin : 796772';
     final shopPhone = _settings['shop_phone'] ?? '+91 98765 43210';
     final shopEmail = _settings['shop_email'] ?? 'hello@krjfashions.com';
     final shopInsta = _settings['shop_instagram'] ?? '@rkj_fashions';
