@@ -16,10 +16,10 @@ app.get('/', (req, res) => {
 
 app.get('/api/app-version', (req, res) => {
     res.json({
-        version: "1.1.9",
-        url: "https://rkj-fashions.onrender.com/downloads/rkj-fashions-v1.1.9.apk",
+        version: "1.1.11",
+        url: "https://rkj-fashions.onrender.com/downloads/rkj-fashions-v1.1.11.apk",
         forceUpdate: true,
-        releaseNotes: "RKJ Fashions v1.1.9: Final production build with guest browsing, splash screen improvements, and address management."
+        releaseNotes: "RKJ Fashions v1.1.11: Critical updates, performance improvements, and bug fixes."
     });
 });
 
@@ -526,29 +526,31 @@ app.get('/api/products', async (req, res) => {
 
 app.post('/api/products', async (req, res) => {
     // Admin Only TODO: Middleware
-    const { name, price, description, sizes, colors, image_urls, is_available, category, stock_quantity } = req.body;
+    const { name, price, discount, description, sizes, colors, image_urls, is_available, category, stock_quantity } = req.body;
     try {
         const result = await db.query(
-            'INSERT INTO products (name, price, description, sizes, colors, image_urls, is_available, category, stock_quantity) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
-            [name, price, description, JSON.stringify(sizes), JSON.stringify(colors), JSON.stringify(image_urls), is_available, category, stock_quantity]
+            'INSERT INTO products (name, price, discount, description, sizes, colors, image_urls, is_available, category, stock_quantity) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+            [name, price, discount || 0, description, JSON.stringify(sizes), JSON.stringify(colors), JSON.stringify(image_urls), is_available, category, stock_quantity]
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
+        console.error('Error adding product:', err);
         res.status(500).json({ error: err.message });
     }
 });
 
 app.put('/api/products/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, price, description, sizes, colors, image_urls, is_available, category, stock_quantity } = req.body;
+    const { name, price, discount, description, sizes, colors, image_urls, is_available, category, stock_quantity } = req.body;
     try {
         const result = await db.query(
-            'UPDATE products SET name = $1, price = $2, description = $3, sizes = $4, colors = $5, image_urls = $6, is_available = $7, category = $8, stock_quantity = $9 WHERE id = $10 RETURNING *',
-            [name, price, description, JSON.stringify(sizes), JSON.stringify(colors), JSON.stringify(image_urls), is_available, category, stock_quantity, id]
+            'UPDATE products SET name = $1, price = $2, discount = $3, description = $4, sizes = $5, colors = $6, image_urls = $7, is_available = $8, category = $9, stock_quantity = $10 WHERE id = $11 RETURNING *',
+            [name, price, discount || 0, description, JSON.stringify(sizes), JSON.stringify(colors), JSON.stringify(image_urls), is_available, category, stock_quantity, id]
         );
         if (result.rows.length === 0) return res.status(404).json({ error: 'Product not found' });
         res.json(result.rows[0]);
     } catch (err) {
+        console.error('Error updating product:', err);
         res.status(500).json({ error: err.message });
     }
 });
