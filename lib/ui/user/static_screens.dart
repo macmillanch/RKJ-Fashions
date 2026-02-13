@@ -209,8 +209,8 @@ class _ContactScreenState extends State<ContactScreen> {
   }
 
   Future<void> _launchDirections() async {
-    const String lat = "22.610486";
-    const String lng = "92.641209";
+    const String lat = "22.6105";
+    const String lng = "92.641222";
     final url = 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
     final uri = Uri.parse(url);
     try {
