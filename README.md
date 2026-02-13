@@ -1,34 +1,38 @@
-# Ladies Boutique App
+# RKJ Fashions - Designer Boutique App
 
-## Overview
-A completed Flutter application for a Ladies Boutique with separate Admin and User roles.
+## 🌟 Overview
+A premium Flutter-based fashion platform with a robust Node.js backend. Features dual interfaces for customers (User App) and shop owners (Admin Dashboard).
 
-## Features
-- **User App**: Professional UI, Product Browsing, Cart, Manual UPI Payment, Order Tracking (India Post), Delivery Confirmation.
-- **Admin App**: Simple UI (Large Fonts), Product Management (Add/Edit), Order Management (Pack/Ship), Tracking Slip Upload.
-- **Backend**: Firebase Auth, Firestore, Storage.
+## 🏗️ Technical Stack
+- **Frontend**: Flutter (Android, iOS)
+- **Backend**: Node.js + Express (Hosted on Render)
+- **Database**: PostgreSQL
+- **Media**: Cloudinary (Image Storage)
 
-## Setup Instructions
+## ✨ Features
+- **👗 User Portal**: Premium "Pro Max" UI, Product Filtering, Cart, Manual UPI Payment Verification, India Post Tracking.
+- **🛡️ Admin Dashboard**: Member Management, Product Inventory, Order Processing (Pack/Ship), UPI/Store Settings.
 
-1. **Firebase Setup**:
-   - Create a Firebase Project.
-   - Run `flutterfire configure` to generate `firebase_options.dart` (or update the mock file provided in `lib/firebase_options.dart`).
-   - Enable **Authentication** (Phone & Email/Password).
-   - Enable **Firestore** and **Storage**.
+## 🚀 Getting Started
 
-2. **Admin Access**:
-   - To create an admin, manually add a document to the `admins` collection in Firestore:
-     - Collection: `admins`
-     - Document ID: `<User UID>` (e.g., `IFwYeozhpTbJdP9YJGvBqHZOtvD2`)
-     - Fields:
-       - `role`: `admin`
-       - `email`: `(optional)`
+### 1. Backend Setup
+- The server is hosted on Render using the `render.yaml` blueprint.
+- Ensure your environment variables for `DATABASE_URL` and `CLOUDINARY_*` are configured in the Render dashboard.
 
-3. **Running the App**:
-   - Install dependencies: `flutter pub get`
-   - Run: `flutter run`
+### 2. Running Locally
+```powershell
+# Install dependencies
+flutter pub get
 
-## Folder Structure
-- `lib/core`: Themes, Colors, Constants.
-- `lib/data`: Models, Services (Auth, DB, Storage), Providers.
-- `lib/ui`: Screens for Auth, Admin, and User.
+# Run App
+flutter run
+```
+
+## 📂 Folder Structure
+- `lib/core`: Design tokens, themes, and global constants.
+- `lib/data`: Data models, API services, and State Management (Provider).
+- `lib/ui`: Screens and widgets for both Admin and User roles.
+- `backend`: Node.js server source code.
+
+## 🛠️ Build Scripts
+- `fix_build.ps1`: Cleans and fixes Android build issues.

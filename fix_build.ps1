@@ -8,6 +8,14 @@ if (Test-Path ".\android\gradlew.bat") {
     .\android\gradlew.bat --stop
 }
 
+Write-Host "Killing any lingering Java processes..."
+Get-Process java -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+
+if (Test-Path ".\android\.gradle") {
+    Write-Host "Deleting android/.gradle cache..."
+    Remove-Item -Path ".\android\.gradle" -Recurse -Force -ErrorAction SilentlyContinue
+}
+
 Write-Host "Running Flutter Clean..."
 flutter clean
 
@@ -18,4 +26,4 @@ Write-Host "Building Android APK (Release)..."
 flutter build apk --release
 
 Write-Host "Build process completed. Check for any errors above."
-Read-Host -Prompt "Press Enter to exit"
+# Read-Host -Prompt "Press Enter to exit"

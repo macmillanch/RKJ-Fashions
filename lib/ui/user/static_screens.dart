@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_colors.dart';
-import 'map_screen.dart';
 import '../../data/services/database_service.dart';
 
 class AboutScreen extends StatelessWidget {
@@ -209,11 +208,18 @@ class _ContactScreenState extends State<ContactScreen> {
     await launchUrl(launchUri);
   }
 
-  Future<void> _openMap() async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const MapScreen()),
-    );
+  Future<void> _launchDirections() async {
+    const String lat = "22.6104473";
+    const String lng = "92.6411212";
+    final url = 'https://www.google.com/maps/search/?api=1&query=$lat,$lng';
+    final uri = Uri.parse(url);
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      debugPrint('Error launching maps: $e');
+    }
   }
 
   @override
@@ -253,123 +259,7 @@ class _ContactScreenState extends State<ContactScreen> {
         child: Column(
           children: [
             const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: GestureDetector(
-                onTap: _openMap,
-                child: Container(
-                  width: double.infinity,
-                  height: 300,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.08),
-                        blurRadius: 40,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                    image: DecorationImage(
-                      // Generic map background instead of specific mall
-                      image: NetworkImage(
-                        'https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=2074&auto=format&fit=crop',
-                      ),
-                      fit: BoxFit.cover,
-                      onError: (e, s) => debugPrint('Map image load failed'),
-                    ),
-                  ),
-                  child: Stack(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              Colors.black.withValues(alpha: 0.1),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryUser,
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 4,
-                                ),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 10,
-                                  ),
-                                ],
-                              ),
-                              child: const Icon(
-                                Icons.storefront,
-                                color: Colors.white,
-                                size: 26,
-                              ),
-                            ),
-                            Transform.translate(
-                              offset: const Offset(0, -5),
-                              child: const Icon(
-                                Icons.arrow_drop_down,
-                                size: 40,
-                                color: AppColors.primaryUser,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 16,
-                        right: 16,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 8,
-                                height: 8,
-                                decoration: const BoxDecoration(
-                                  color: Colors.green,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              const Text(
-                                'Open Now',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textUser,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            const SizedBox(height: 16),
 
             Transform.translate(
               offset: const Offset(0, -24),
@@ -445,7 +335,7 @@ class _ContactScreenState extends State<ContactScreen> {
                       Column(
                         children: [
                           ElevatedButton.icon(
-                            onPressed: _openMap,
+                            onPressed: _launchDirections,
                             icon: const Icon(Icons.near_me),
                             label: const Text('Directions'),
                             style: ElevatedButton.styleFrom(

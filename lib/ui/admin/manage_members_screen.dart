@@ -188,11 +188,13 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
   Future<void> _updateRole(User user, String newRole) async {
     try {
       await context.read<DatabaseService>().updateUserRole(user.id, newRole);
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('User role updated to $newRole')));
       _fetchUsers();
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
@@ -221,14 +223,18 @@ class _ManageMembersScreenState extends State<ManageMembersScreen> {
       ),
     );
 
+    if (!mounted) return;
+
     if (confirmed == true) {
       try {
         await context.read<DatabaseService>().deleteUser(user.id);
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('User deleted successfully')),
         );
         _fetchUsers();
       } catch (e) {
+        if (!mounted) return;
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Error: $e')));

@@ -103,7 +103,6 @@ class AdminHomeScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                // Placeholder for Analytics or other features
                 _AdminTile(
                   title: 'Shop & UPI Settings',
                   icon: Icons.storefront_outlined,

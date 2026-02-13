@@ -49,7 +49,14 @@ class DatabaseService {
       body: jsonEncode(product.toJson()),
     );
     if (response.statusCode != 201) {
-      throw Exception('Failed to add product');
+      String msg = 'Failed to add product';
+      try {
+        final errorData = jsonDecode(response.body);
+        msg = errorData['error'] ?? msg;
+      } catch (_) {
+        msg += ': ${response.statusCode}';
+      }
+      throw Exception(msg);
     }
   }
 
@@ -346,6 +353,8 @@ class DatabaseService {
     if (response.statusCode != 200) {
       throw Exception('Failed to update settings');
     }
+  }
+
   Future<void> updateUserRole(String userId, String role) async {
     final response = await http.put(
       Uri.parse('$_baseUrl/users/$userId/role'),
